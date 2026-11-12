@@ -28,14 +28,16 @@ var PERSONALIZACAO = {
     borda:          "#C9D4CE", // linhas e contornos
     principal:      "#2B5A87", // botões e destaques
     principalClaro: "#E4EDF6", // fundo de botões selecionados
-    coube:          "#1D6B3F", // verde: coube
+    coube:          "#1D6B3F", // verde: faixa A, coube na sobra
     coubeFundo:     "#E2F2E7",
-    passou:         "#AE2A1F", // vermelho: passou
+    atencao:        "#7A4E00", // amarelo-escuro: faixa B
+    atencaoFundo:   "#FFF3D6",
+    passou:         "#AE2A1F", // vermelho: faixa C, passou da sobra
     passouFundo:    "#FBE8E5",
     aviso:          "#6E5200", // faixa do modo exemplo
     avisoFundo:     "#FFF1BF",
-    barraEmpresa:   "#2B5A87", // barra "quanto a empresa deixou"
-    barraRetirado:  "#8F5715"  // barra "quanto você retirou"
+    barraEmpresa:   "#2B5A87", // barra "Sobra da empresa"
+    barraRetirado:  "#8F5715"  // barra "Total retirado"
   },
 
   // Botões rápidos de "Para que foi?"
@@ -45,29 +47,23 @@ var PERSONALIZACAO = {
 /* =====================================================================
    2) DADOS DO EXEMPLO
    É o que aparece no botão "Ver um exemplo". Não mistura com os dados
-   da pessoa. Para trocar pelo caso real, mude os valores abaixo.
-   - Valores: escreva como no dia a dia, entre aspas ("6.000" ou "420,50").
-   - retiradaFixa: deixe "" (aspas vazias) se não houver.
-   - Cada retirada é uma linha: ["dia/mês", "para que foi", "valor"],
+   da pessoa. Para trocar o caso, mude os valores abaixo.
+   - Valores: escreva como no dia a dia, entre aspas ("41.990" ou "420,50").
+   - proLabore e dinheiroDaCasa: deixe "" (aspas vazias) se não houver.
+   - Cada retirada é uma linha: ["dia", "para que foi", "quem retirou", "valor"],
      e toda linha termina com vírgula, menos a última.
+   - "quem retirou" precisa ser um dos sócios ou todos juntos
+     (com 2 sócios: "Jonas e Camila"; com 3: "Ana, Bia e Caio").
    ===================================================================== */
 var EXEMPLO = {
-  mes: 10,      // 1 = janeiro ... 12 = dezembro
-  ano: 2026,
-  entrou: "6.000",
-  gastou: "3.500",
-  retiradaFixa: "",
+  nomeDoMes: "Mês 3",
+  socios: ["Jonas", "Camila"],
+  receita: "41.990",
+  gastos: "35.883",
+  proLabore: "6.000",
+  dinheiroDaCasa: "",
   retiradas: [
-    ["03/10", "Mercado", "420"],
-    ["05/10", "Aluguel de casa", "950"],
-    ["08/10", "Conta de luz de casa", "180"],
-    ["10/10", "Mensalidade da escola", "350"],
-    ["12/10", "Farmácia", "85"],
-    ["15/10", "Mercado", "390"],
-    ["18/10", "Combustível do carro da família", "150"],
-    ["20/10", "Internet e celular de casa", "135"],
-    ["22/10", "Presente de aniversário", "90"],
-    ["26/10", "Mercado", "150"]
+    ["5", "Pró-labore dos 2 sócios", "Jonas e Camila", "6.000"]
   ]
 };
 /* ===================== FIM DAS PARTES PARA TROCAR ===================== */
@@ -103,7 +99,6 @@ h3 { font-size: 1.15rem; }
 p { margin: 0; }
 a { color: var(--principal); }
 :focus-visible { outline: 3px solid var(--principal); outline-offset: 2px; }
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .pagina {
   max-width: 640px;
@@ -153,7 +148,7 @@ a { color: var(--principal); }
 .btn.pequeno { min-height: 44px; padding: 6px 14px; font-size: 1rem; }
 .btn.largo { width: 100%; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
-.link-btn { background: none; border: 0; padding: 8px 0; color: var(--principal); font-weight: 600; text-decoration: underline; cursor: pointer; min-height: 44px; }
+.link-btn { background: none; border: 0; padding: 8px 0; color: var(--principal); font-weight: 600; text-decoration: underline; cursor: pointer; min-height: 44px; text-align: left; }
 .pilha { display: grid; gap: 12px; }
 
 /* Seções */
@@ -193,12 +188,14 @@ input[type="date"] { font-size: 1.15rem; }
 .total-linha { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .total-linha strong { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
 .lista { list-style: none; margin: 0; padding: 0; display: grid; }
-.item { display: grid; gap: 8px; padding: 14px 0; border-top: 1px solid var(--borda); }
+.item { display: grid; gap: 6px; padding: 14px 0; border-top: 1px solid var(--borda); }
 .item:first-child { border-top: 0; }
 .item-topo { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
 .item-motivo { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
 .item-valor { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.item-info { display: flex; flex-wrap: wrap; gap: 4px 16px; }
 .item-baixo { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.item-acum { font-variant-numeric: tabular-nums; }
 .item-acoes { display: flex; gap: 8px; }
 .vazio { color: var(--textoSuave); text-align: center; padding: 12px 0; }
 
@@ -216,9 +213,13 @@ details.explica .conteudo { padding: 0 18px 18px; display: grid; gap: 12px; }
 .leitura.coube { background: var(--coubeFundo); border-color: var(--coube); }
 .leitura.coube .icone { background: var(--coube); color: #fff; }
 .leitura.coube .selo { color: var(--coube); }
+.leitura.atencao { background: var(--atencaoFundo); border-color: var(--atencao); }
+.leitura.atencao .icone { background: var(--atencao); color: #fff; }
+.leitura.atencao .selo { color: var(--atencao); }
 .leitura.passou { background: var(--passouFundo); border-color: var(--passou); }
 .leitura.passou .icone { background: var(--passou); color: #fff; }
 .leitura.passou .selo { color: var(--passou); }
+.leitura.simples p { font-size: 1.05rem; font-weight: 600; }
 
 .numeros { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .numero { background: var(--cartao); border: 1px solid var(--borda); border-radius: 14px; padding: 14px; display: grid; gap: 4px; align-content: start; }
@@ -229,6 +230,18 @@ details.explica .conteudo { padding: 0 18px 18px; display: grid; gap: 12px; }
 .numero.passou { border-color: var(--passou); background: var(--passouFundo); }
 .numero.passou .val, .numero.passou .rot { color: var(--passou); }
 .numero.coube .val { color: var(--coube); }
+
+.linhas { display: grid; }
+.linha { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--borda); }
+.linha:first-child { border-top: 0; padding-top: 0; }
+.linha span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.linha span:last-child { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.tabela-rolagem { overflow-x: auto; }
+.tabela { width: 100%; border-collapse: collapse; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.tabela th, .tabela td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--borda); vertical-align: top; }
+.tabela th { color: var(--textoSuave); font-weight: 700; }
+.tabela .v { text-align: right; white-space: nowrap; }
 
 /* Gráficos */
 .grafico { display: grid; gap: 14px; }
@@ -252,8 +265,10 @@ details.explica .conteudo { padding: 0 18px 18px; display: grid; gap: 12px; }
 .mes-hist { display: grid; gap: 10px; padding: 16px 0; border-top: 1px solid var(--borda); }
 .mes-hist:first-of-type { border-top: 0; padding-top: 0; }
 .mes-hist-topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
-.etiqueta { display: inline-block; border-radius: 999px; padding: 2px 12px; font-size: 1rem; font-weight: 700; border: 2px solid var(--borda); }
+.mes-hist-topo h4 { margin: 0; font-size: 1.1rem; }
+.etiqueta { display: inline-block; border-radius: 999px; padding: 2px 12px; font-size: 1rem; font-weight: 700; border: 2px solid var(--borda); white-space: nowrap; }
 .etiqueta.coube { color: var(--coube); background: var(--coubeFundo); border-color: var(--coube); }
+.etiqueta.atencao { color: var(--atencao); background: var(--atencaoFundo); border-color: var(--atencao); }
 .etiqueta.passou { color: var(--passou); background: var(--passouFundo); border-color: var(--passou); }
 .etiqueta.neutro { color: var(--textoSuave); }
 
@@ -311,7 +326,6 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
 #impressao { display: none; }
 
 @media (min-width: 700px) {
-  body { font-size: 18px; }
   .topo h1 { font-size: 1.6rem; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -378,7 +392,7 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
       <form class="caixa" id="formRetirada" novalidate>
         <h3>Anotar uma retirada</h3>
         <div class="campo" id="campo-rValor">
-          <label for="rValor">Quanto você tirou?</label>
+          <label for="rValor">Quanto foi retirado?</label>
           <div class="entrada grande"><span class="prefixo" aria-hidden="true">R$</span>
             <input id="rValor" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" aria-describedby="rValorErro">
           </div>
@@ -390,6 +404,13 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
           <label for="rMotivo" class="dica">Toque em uma opção ou escreva:</label>
           <div class="entrada"><input id="rMotivo" type="text" maxlength="80" autocomplete="off" placeholder="Ex.: farmácia" aria-describedby="rMotivoErro"></div>
           <p class="msg-erro" id="rMotivoErro" hidden></p>
+        </div>
+        <div class="campo" id="campo-rQuem">
+          <span class="rotulo" id="rQuemRot">Quem retirou?</span>
+          <div class="chips" role="group" aria-labelledby="rQuemRot" data-quem-para="rQuem"></div>
+          <input type="hidden" id="rQuem">
+          <button type="button" class="link-btn" data-acao="socios">Mudar os nomes dos sócios</button>
+          <p class="msg-erro" id="rQuemErro" hidden></p>
         </div>
         <div class="campo" id="campo-rData">
           <label for="rData">Quando?</label>
@@ -409,6 +430,7 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
           <h3 id="h-lista">Retiradas do mês</h3>
           <strong id="totalLista"></strong>
         </div>
+        <p class="leitura atencao simples" id="avisoProLabore" role="status" hidden><span class="icone" aria-hidden="true">!</span><span>As retiradas do mês chegaram ao pró-labore combinado.</span></p>
         <ul class="lista" id="listaRetiradas" aria-labelledby="h-lista"></ul>
       </div>
     </section>
@@ -419,40 +441,51 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
       <p class="suave">Preencha no fim do mês, ou quando tiver os números. Pode deixar em branco o que ainda não sabe.</p>
 
       <div class="caixa">
-        <div class="campo" id="campo-mEntrou">
-          <label for="mEntrou">Quanto entrou na empresa?</label>
-          <p class="dica" id="mEntrouDica">Some tudo o que os clientes pagaram no mês: dinheiro, Pix e cartão.</p>
+        <div class="campo" id="campo-mReceita">
+          <label for="mReceita">Receita do mês</label>
+          <p class="dica" id="mReceitaDica">Quanto a empresa vendeu no mês.</p>
           <div class="entrada"><span class="prefixo" aria-hidden="true">R$</span>
-            <input id="mEntrou" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" aria-describedby="mEntrouDica mEntrouErro">
+            <input id="mReceita" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" aria-describedby="mReceitaDica mReceitaErro">
           </div>
-          <p class="msg-erro" id="mEntrouErro" hidden></p>
+          <p class="msg-erro" id="mReceitaErro" hidden></p>
         </div>
 
-        <div class="campo" id="campo-mGastou">
-          <label for="mGastou">Quanto a empresa gastou?</label>
-          <p class="dica" id="mGastouDica">Só as contas da empresa: aluguel do ponto, fornecedores, material, luz do estabelecimento. Não inclua as suas retiradas.</p>
+        <div class="campo" id="campo-mGastos">
+          <label for="mGastos">Gastos da empresa sem o pró-labore</label>
+          <p class="dica" id="mGastosDica">Mercadoria, aluguel, equipe, impostos e as demais contas do negócio.</p>
           <div class="entrada"><span class="prefixo" aria-hidden="true">R$</span>
-            <input id="mGastou" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" aria-describedby="mGastouDica mGastouErro">
+            <input id="mGastos" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" aria-describedby="mGastosDica mGastosErro">
           </div>
-          <p class="msg-erro" id="mGastouErro" hidden></p>
+          <p class="msg-erro" id="mGastosErro" hidden></p>
         </div>
 
         <div class="numero" aria-live="polite">
-          <span class="rot">Quanto a empresa deixou</span>
-          <span class="val" id="mDeixou"></span>
-          <span class="obs">É o que entrou menos o que a empresa gastou.</span>
+          <span class="rot">Sobra da empresa</span>
+          <span class="val" id="mSobra"></span>
+          <span class="obs">Receita do mês menos os gastos sem o pró-labore.</span>
         </div>
       </div>
 
       <div class="caixa">
-        <div class="campo" id="campo-mFixa">
-          <label for="mFixa">Retirada fixa combinada <span class="suave">(se já tiver)</span></label>
-          <p class="dica" id="mFixaDica">O valor que você decidiu tirar por mês, como um salário de dono. No primeiro mês, deixe em branco.</p>
+        <div class="campo" id="campo-mProLabore">
+          <label for="mProLabore">Pró-labore combinado</label>
+          <p class="dica" id="mProLaboreDica">O valor fixo mensal dos sócios; no 1º mês, deixe em branco.</p>
           <div class="entrada"><span class="prefixo" aria-hidden="true">R$</span>
-            <input id="mFixa" type="text" inputmode="decimal" autocomplete="off" placeholder="Em branco" aria-describedby="mFixaDica mFixaOrigem mFixaErro">
+            <input id="mProLabore" type="text" inputmode="decimal" autocomplete="off" placeholder="Em branco" aria-describedby="mProLaboreDica mProLaboreOrigem mProLaboreErro">
           </div>
-          <p class="dica" id="mFixaOrigem" hidden></p>
-          <p class="msg-erro" id="mFixaErro" hidden></p>
+          <p class="dica" id="mProLaboreOrigem" hidden></p>
+          <p class="msg-erro" id="mProLaboreErro" hidden></p>
+        </div>
+      </div>
+
+      <div class="caixa">
+        <div class="campo" id="campo-mCasa">
+          <label for="mCasa">Dinheiro da casa colocado na empresa (se houver)</label>
+          <p class="dica" id="mCasaDica">Só fica registrado e aparece no resumo. Não entra nos cálculos.</p>
+          <div class="entrada"><span class="prefixo" aria-hidden="true">R$</span>
+            <input id="mCasa" type="text" inputmode="decimal" autocomplete="off" placeholder="Em branco" aria-describedby="mCasaDica mCasaErro">
+          </div>
+          <p class="msg-erro" id="mCasaErro" hidden></p>
         </div>
       </div>
       <p class="salvo" id="mSalvo" aria-live="polite"></p>
@@ -465,7 +498,13 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
       <div id="resLeitura" class="pilha" aria-live="polite"></div>
       <div class="numeros" id="resNumeros"></div>
       <div class="caixa">
-        <h3 id="h-graf-mes">Comparação do mês</h3>
+        <h3>Resumo do mês</h3>
+        <div class="linhas" id="resResumo"></div>
+        <h3>Total retirado por sócio</h3>
+        <div class="linhas" id="resSocios"></div>
+      </div>
+      <div class="caixa">
+        <h3>Comparação do mês</h3>
         <div id="resGrafico"></div>
       </div>
       <div class="caixa leitura" id="lembreteCopia" hidden>
@@ -481,12 +520,16 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     <section class="secao" id="tela-historico" aria-labelledby="h-historico" hidden>
       <h2 id="h-historico" tabindex="-1">Histórico</h2>
       <button type="button" class="btn largo" data-acao="novoMes">Criar mês novo</button>
+      <div class="caixa">
+        <h3 id="h-comparar">Comparação dos meses</h3>
+        <div class="tabela-rolagem" id="histTabela"></div>
+      </div>
       <div class="caixa" id="histMedia" aria-live="polite"></div>
       <div class="caixa">
         <h3>Mês a mês</h3>
         <div class="legenda" aria-hidden="true">
-          <span><i style="background: var(--barraEmpresa)"></i>Quanto a empresa deixou</span>
-          <span><i style="background: var(--barraRetirado)"></i>Quanto você retirou</span>
+          <span><i style="background: var(--barraEmpresa)"></i>Sobra da empresa</span>
+          <span><i style="background: var(--barraRetirado)"></i>Total retirado</span>
         </div>
         <div id="histMeses"></div>
       </div>
@@ -501,6 +544,12 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
         <p class="suave">Para não perder nada, faça uma cópia de segurança uma vez por mês.</p>
       </div>
       <p class="leitura" id="dadosExemploAviso" hidden>Você está no exemplo. Saia do exemplo para baixar, copiar ou apagar os seus dados.</p>
+
+      <div class="caixa">
+        <h3>Sócios</h3>
+        <p class="dica" id="txtSocios"></p>
+        <button type="button" class="btn sec largo" data-acao="socios">Mudar os nomes dos sócios</button>
+      </div>
 
       <div class="caixa">
         <h3>Guardar e levar</h3>
@@ -559,6 +608,7 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
       <li><button type="button" class="btn sec" data-acao="exemplo" id="menuExemplo">Ver um exemplo</button></li>
       <li><button type="button" class="btn sec" data-acao="passoAPasso">Rever o passo a passo</button></li>
       <li><button type="button" class="btn sec" data-acao="explicaRetirada">O que conta como retirada</button></li>
+      <li><button type="button" class="btn sec" data-acao="socios">Nomes dos sócios</button></li>
       <li><button type="button" class="btn sec" data-ir="dados">Meus dados (cópia, planilha, apagar)</button></li>
     </ul>
     <div class="janela-acoes"><button type="button" class="btn" data-fechar>Fechar</button></div>
@@ -593,12 +643,29 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
   </form>
 </dialog>
 
+<!-- Janela: sócios -->
+<dialog id="dlgSocios" aria-labelledby="dlgSociosTit">
+  <form class="janela" id="formSocios" novalidate>
+    <h2 id="dlgSociosTit">Nomes dos sócios</h2>
+    <p class="dica">Escreva o nome de cada sócio que tira dinheiro da empresa. Se você trabalha sozinho, escreva só o seu nome. Vale para todos os meses.</p>
+    <div class="campo"><label for="sNome1">Sócio 1</label><div class="entrada"><input id="sNome1" type="text" maxlength="40" autocomplete="off"></div></div>
+    <div class="campo"><label for="sNome2">Sócio 2 (se houver)</label><div class="entrada"><input id="sNome2" type="text" maxlength="40" autocomplete="off"></div></div>
+    <div class="campo"><label for="sNome3">Sócio 3 (se houver)</label><div class="entrada"><input id="sNome3" type="text" maxlength="40" autocomplete="off"></div></div>
+    <div class="campo"><label for="sNome4">Sócio 4 (se houver)</label><div class="entrada"><input id="sNome4" type="text" maxlength="40" autocomplete="off"></div></div>
+    <p class="msg-erro" id="sErro" hidden></p>
+    <div class="janela-acoes">
+      <button type="button" class="btn sec" data-fechar>Cancelar</button>
+      <button type="submit" class="btn">Salvar nomes</button>
+    </div>
+  </form>
+</dialog>
+
 <!-- Janela: corrigir retirada -->
 <dialog id="dlgEditar" aria-labelledby="dlgEditarTit">
   <form class="janela" id="formEditar" novalidate>
     <h2 id="dlgEditarTit">Corrigir retirada</h2>
     <div class="campo" id="campo-eValor">
-      <label for="eValor">Quanto você tirou?</label>
+      <label for="eValor">Quanto foi retirado?</label>
       <div class="entrada grande"><span class="prefixo" aria-hidden="true">R$</span>
         <input id="eValor" type="text" inputmode="decimal" autocomplete="off" aria-describedby="eValorErro">
       </div>
@@ -610,6 +677,12 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
       <label for="eMotivo" class="dica">Toque em uma opção ou escreva:</label>
       <div class="entrada"><input id="eMotivo" type="text" maxlength="80" autocomplete="off" aria-describedby="eMotivoErro"></div>
       <p class="msg-erro" id="eMotivoErro" hidden></p>
+    </div>
+    <div class="campo" id="campo-eQuem">
+      <span class="rotulo" id="eQuemRot">Quem retirou?</span>
+      <div class="chips" role="group" aria-labelledby="eQuemRot" data-quem-para="eQuem"></div>
+      <input type="hidden" id="eQuem">
+      <p class="msg-erro" id="eQuemErro" hidden></p>
     </div>
     <div class="campo" id="campo-eData">
       <label for="eData">Quando?</label>
@@ -667,31 +740,41 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
   "use strict";
 
   /* ---------- Constantes ---------- */
+  // Nome da "gaveta" onde os dados ficam guardados. Não mude: quem já usa o site perderia o acesso aos dados.
   var CHAVE = "controleRetiradasDono.v1";
   var NOMES_MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
   var DIAS_SEM_COPIA = 30;
+  var NAO_INFORMADO = "Não informado";
+
+  var FAIXAS = {
+    A: { tom: "coube", criterio: "Total retirado até o pró-labore combinado e até 100,0% da sobra.",
+         decisao: "Mantenha o valor e o dia do pró-labore." },
+    B: { tom: "atencao", criterio: "Total retirado acima do pró-labore combinado, mas até 100,0% da sobra.",
+         decisao: "Volte ao valor combinado no mês seguinte e anote o motivo de cada retirada extra." },
+    C: { tom: "passou", criterio: "Total retirado acima de 100,0% da sobra.",
+         decisao: "Reduza o pró-labore até caber na sobra e consulte os Capítulos 4 e 5." }
+  };
 
   var PASSOS = [
-    { tit: "Anote cada retirada", txt: "Toda vez que tirar dinheiro da empresa para você ou para a sua casa, anote aqui: quanto foi, para que foi e quando.",
+    { tit: "Anote cada retirada", txt: "Toda vez que alguém tirar dinheiro da empresa para uso pessoal ou da casa, anote aqui: quanto foi, para que foi, quem retirou e quando.",
       icone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>' },
-    { tit: "No fim do mês, preencha os números", txt: "Informe quanto entrou na empresa e quanto ela gastou com as contas dela. O site calcula quanto a empresa deixou.",
+    { tit: "No fim do mês, preencha os números", txt: "Informe a receita do mês e os gastos da empresa sem o pró-labore. O site calcula a sobra da empresa.",
       icone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>' },
-    { tit: "Compare e decida", txt: "Veja se as suas retiradas couberam no que a empresa deixou. Com isso, você define uma retirada fixa por mês, como um salário de dono. Os seus dados ficam só neste aparelho.",
+    { tit: "Veja a faixa e decida", txt: "O site compara o total retirado com a sobra e com o pró-labore combinado e mostra a faixa do mês com a decisão. Os seus dados ficam só neste aparelho.",
       icone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>' }
   ];
 
   var EXPLICA_RETIRADA =
     '<p><strong>Retirada é todo dinheiro que sai da empresa para algo seu ou da sua casa.</strong></p>' +
     '<p>Conta como retirada:</p>' +
-    '<ul><li>Mercado, aluguel e contas da sua casa</li><li>Escola, farmácia, lazer da família</li><li>Dinheiro que você pega do caixa para você</li><li>Pix ou cartão da empresa usado em algo pessoal</li></ul>' +
-    '<p>Não conta, porque é despesa da empresa:</p>' +
-    '<ul><li>Aluguel do ponto</li><li>Fornecedores e material de trabalho</li><li>Luz, água e internet do estabelecimento</li></ul>' +
-    '<p class="suave">As despesas da empresa vão no campo "Quanto a empresa gastou", na tela Mês.</p>';
+    '<ul><li>O pró-labore dos sócios</li><li>Mercado, aluguel e contas da sua casa</li><li>Escola, farmácia, lazer da família</li><li>Dinheiro que você pega do caixa para você</li><li>Pix ou cartão da empresa usado em algo pessoal</li></ul>' +
+    '<p>Não conta, porque é gasto da empresa:</p>' +
+    '<ul><li>Mercadoria e fornecedores</li><li>Aluguel do ponto</li><li>Equipe e impostos</li><li>Luz, água e internet do estabelecimento</li></ul>' +
+    '<p class="suave">Os gastos da empresa vão no campo "Gastos da empresa sem o pró-labore", na tela Mês.</p>';
 
   /* ---------- Estado ---------- */
   var dados = null;          // dados reais da pessoa
   var exemplo = null;        // dados do exemplo (só na memória)
-  var telaAtual = "retiradas";
   var editandoId = null;
   var passo = 0;
   var armazenamentoOk = true;
@@ -700,11 +783,11 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
   function mesAberto() { var d = atual(); return d.meses[d.mesAberto]; }
 
   function dadosVazios() {
-    return { versao: 1, meses: {}, mesAberto: null, viuPassoAPasso: false, ultimaCopia: null, dicaIphoneVista: false };
+    return { versao: 2, meses: {}, socios: [], mesAberto: null, viuPassoAPasso: false, ultimaCopia: null, dicaIphoneVista: false };
   }
-  function mesVazio() { return { entrou: null, gastou: null, fixa: null, retiradas: [] }; }
+  function mesVazio() { return { receita: null, gastos: null, proLabore: null, dinheiroCasa: null, retiradas: [] }; }
 
-  /* ---------- Dinheiro ---------- */
+  /* ---------- Dinheiro e percentual ---------- */
   // Lê o que a pessoa digitou. Devolve centavos, null (vazio) ou NaN (não entendi).
   function lerValor(txt) {
     if (txt == null) return null;
@@ -733,12 +816,22 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     return parseInt(inteiro, 10) * 100 + parseInt(dec, 10);
   }
 
+  function milhar(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
   function semRS(c) {
     c = Math.abs(c);
     var reais = Math.floor(c / 100), cent = c % 100;
-    return String(reais).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "," + (cent < 10 ? "0" : "") + cent;
+    return milhar(reais) + "," + (cent < 10 ? "0" : "") + cent;
   }
-  function rs(c) { return (c < 0 ? "−" : "") + "R$\u00a0" + semRS(c); }
+  function rs(c) { return (c < 0 ? "−" : "") + "R$ " + semRS(c); }
+
+  // Parte da sobra usada pela casa, com 1 casa decimal e vírgula.
+  // Quando o total passou da sobra mas o arredondamento daria 100,0%, escreve "acima de 100,0%".
+  function textoParte(total, sobra) {
+    if (sobra <= 0) return null;
+    var decimos = Math.round(total * 1000 / sobra);
+    if (total > sobra && decimos <= 1000) return "acima de 100,0%";
+    return milhar(Math.floor(decimos / 10)) + "," + (decimos % 10) + "%";
+  }
 
   /* ---------- Datas ---------- */
   function doisDig(n) { return (n < 10 ? "0" : "") + n; }
@@ -747,13 +840,24 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
   function chaveHoje() { var d = new Date(); return chaveDe(d.getFullYear(), d.getMonth() + 1); }
   function partes(chave) { var p = chave.split("-"); return { ano: +p[0], mes: +p[1] }; }
   function diasNoMes(ano, mes) { return new Date(ano, mes, 0).getDate(); }
+  function nomeExemplo(chave) { return exemplo && exemplo.nomeDoMes && chave === exemplo.chaveExemplo ? exemplo.nomeDoMes : null; }
   function nomeMes(chave, maiuscula) {
+    var ex = nomeExemplo(chave); if (ex) return ex;
     var p = partes(chave), n = NOMES_MESES[p.mes - 1] + " de " + p.ano;
     return maiuscula ? n.charAt(0).toUpperCase() + n.slice(1) : n;
   }
-  function nomeMesCurto(chave) { var p = partes(chave); var n = NOMES_MESES[p.mes - 1]; return n.charAt(0).toUpperCase() + n.slice(1) + " de " + p.ano; }
+  function nomeMesCurto(chave) { return nomeMes(chave, true); }
+  function nomeMesTabela(chave) {
+    var ex = nomeExemplo(chave); if (ex) return ex;
+    var p = partes(chave), n = NOMES_MESES[p.mes - 1].slice(0, 3);
+    return n.charAt(0).toUpperCase() + n.slice(1) + "/" + String(p.ano).slice(2);
+  }
   function dataBR(iso) { var p = iso.split("-"); return p[2] + "/" + p[1] + "/" + p[0]; }
-  function dataCurta(iso) { var p = iso.split("-"); return p[2] + "/" + p[1]; }
+  // No exemplo com nome próprio de mês ("Mês 3"), a data aparece como "Dia 5".
+  function dataExib(iso, chave) {
+    if (nomeExemplo(chave)) return "Dia " + (+iso.split("-")[2]);
+    return dataBR(iso);
+  }
   function limitesMes(chave) {
     var p = partes(chave);
     return { min: chave + "-01", max: chave + "-" + doisDig(diasNoMes(p.ano, p.mes)) };
@@ -790,50 +894,83 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
   }
 
   // Confere e limpa dados vindos da memória ou de uma cópia.
+  // Também converte os dados da versão antiga (entrou, gastou, fixa) para os nomes novos.
   function limpar(obj) {
     if (!obj || typeof obj !== "object" || !obj.meses || typeof obj.meses !== "object") return null;
     var d = dadosVazios();
     function num(v) { return (typeof v === "number" && isFinite(v) && v >= 0) ? Math.round(v) : null; }
+    function primeiro(a, b) { return a !== undefined ? a : b; }
     Object.keys(obj.meses).forEach(function (k) {
       if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(k)) return;
       var m = obj.meses[k] || {};
       var r = Array.isArray(m.retiradas) ? m.retiradas : [];
+      var de = primeiro(m.proLaboreDe, m.fixaDe);
       d.meses[k] = {
-        entrou: num(m.entrou), gastou: num(m.gastou), fixa: num(m.fixa),
-        fixaDe: (typeof m.fixaDe === "string" && /^\d{4}-\d{2}$/.test(m.fixaDe)) ? m.fixaDe : undefined,
+        receita: num(primeiro(m.receita, m.entrou)),
+        gastos: num(primeiro(m.gastos, m.gastou)),
+        proLabore: num(primeiro(m.proLabore, m.fixa)),
+        proLaboreDe: (typeof de === "string" && /^\d{4}-\d{2}$/.test(de)) ? de : undefined,
+        dinheiroCasa: num(m.dinheiroCasa),
         retiradas: r.filter(function (x) {
           return x && typeof x.data === "string" && /^\d{4}-\d{2}-\d{2}$/.test(x.data) && typeof x.valor === "number" && x.valor > 0;
         }).map(function (x) {
-          return { id: String(x.id || novoId()), data: x.data, motivo: String(x.motivo || "Outro").slice(0, 80), valor: Math.round(x.valor) };
+          return { id: String(x.id || novoId()), data: x.data, motivo: String(x.motivo || "Outro").slice(0, 80),
+                   quem: typeof x.quem === "string" ? x.quem.slice(0, 120) : "", valor: Math.round(x.valor) };
         })
       };
     });
+    d.socios = Array.isArray(obj.socios) ? limparNomes(obj.socios) : [];
     d.mesAberto = (typeof obj.mesAberto === "string" && d.meses[obj.mesAberto]) ? obj.mesAberto : null;
     d.viuPassoAPasso = !!obj.viuPassoAPasso;
     d.ultimaCopia = typeof obj.ultimaCopia === "string" ? obj.ultimaCopia : null;
     d.dicaIphoneVista = !!obj.dicaIphoneVista;
     return d;
   }
+  function limparNomes(lista) {
+    var vistos = {}, saida = [];
+    lista.forEach(function (n) {
+      n = String(n || "").trim().slice(0, 40);
+      if (n && !vistos[n.toLowerCase()]) { vistos[n.toLowerCase()] = true; saida.push(n); }
+    });
+    return saida.slice(0, 4);
+  }
   function novoId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  /* ---------- Sócios ---------- */
+  // "Jonas e Camila"; "Ana, Bia e Caio".
+  function juntarNomes(nomes) {
+    if (nomes.length < 2) return nomes[0] || "";
+    return nomes.slice(0, -1).join(", ") + " e " + nomes[nomes.length - 1];
+  }
+  function opcoesQuem(extra) {
+    var s = atual().socios.slice();
+    if (s.length >= 2) s.push(juntarNomes(s));
+    if (extra && s.indexOf(extra) < 0) s.push(extra);
+    return s;
+  }
 
   /* ---------- Exemplo ---------- */
   function montarExemplo() {
-    var chave = chaveDe(EXEMPLO.ano, EXEMPLO.mes);
+    var chave = chaveHoje();
     var m = {
-      entrou: lerValorOuNulo(EXEMPLO.entrou),
-      gastou: lerValorOuNulo(EXEMPLO.gastou),
-      fixa: lerValorOuNulo(EXEMPLO.retiradaFixa),
+      receita: lerValorOuNulo(EXEMPLO.receita),
+      gastos: lerValorOuNulo(EXEMPLO.gastos),
+      proLabore: lerValorOuNulo(EXEMPLO.proLabore),
+      dinheiroCasa: lerValorOuNulo(EXEMPLO.dinheiroDaCasa),
       retiradas: []
     };
+    var p = partes(chave);
     (EXEMPLO.retiradas || []).forEach(function (linha) {
-      var dm = String(linha[0]).split("/");
-      var dia = doisDig(+dm[0]), mes = doisDig(+(dm[1] || EXEMPLO.mes));
-      var v = lerValor(linha[2]);
+      var dia = Math.min(Math.max(parseInt(linha[0], 10) || 1, 1), diasNoMes(p.ano, p.mes));
+      var v = lerValor(linha[3]);
       if (!(v > 0)) return;
-      m.retiradas.push({ id: novoId(), data: EXEMPLO.ano + "-" + mes + "-" + dia, motivo: String(linha[1]), valor: v });
+      m.retiradas.push({ id: novoId(), data: chave + "-" + doisDig(dia), motivo: String(linha[1]), quem: String(linha[2] || ""), valor: v });
     });
     var d = dadosVazios();
     d.meses[chave] = m; d.mesAberto = chave; d.viuPassoAPasso = true;
+    d.socios = limparNomes(EXEMPLO.socios || []);
+    d.nomeDoMes = EXEMPLO.nomeDoMes || "";
+    d.chaveExemplo = chave;
     return d;
   }
   function lerValorOuNulo(t) { var v = lerValor(t); return (v === null || isNaN(v)) ? null : v; }
@@ -842,51 +979,61 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
   function calcular(m) {
     var total = 0;
     m.retiradas.forEach(function (r) { total += r.valor; });
-    var temValores = m.entrou !== null && m.gastou !== null;
-    var deixou = temValores ? m.entrou - m.gastou : null;
+    var temValores = m.receita !== null && m.gastos !== null;
+    var sobra = temValores ? m.receita - m.gastos : null;
     return {
       total: total,
       qtd: m.retiradas.length,
       temValores: temValores,
-      deixou: deixou,
-      ficou: temValores ? deixou - total : null,
-      temFixa: m.fixa !== null,
-      podeAinda: m.fixa !== null ? m.fixa - total : null
+      sobra: sobra,
+      parte: temValores ? textoParte(total, sobra) : null,
+      ficou: temValores ? sobra - total : null,
+      temProLabore: m.proLabore !== null,
+      podeAinda: m.proLabore !== null ? m.proLabore - total : null
     };
   }
 
-  // Monta as frases de leitura do resultado.
-  function leitura(m) {
-    var c = calcular(m), blocos = [];
-    if (c.qtd === 0) {
-      blocos.push({ tom: "neutro", selo: "Ainda sem resultado", textos: ["Anote as suas retiradas para ver o resultado."] });
-      return blocos;
-    }
-    if (!c.temValores) {
-      blocos.push({ tom: "neutro", selo: "Falta preencher", textos: ["Preencha quanto entrou e quanto a empresa gastou para comparar com as suas retiradas."], irMes: true });
-    } else {
-      var t = [];
-      if (c.deixou < 0) t.push("Neste mês a empresa gastou " + rs(-c.deixou) + " a mais do que entrou.");
-      var tom, selo;
-      if (c.total > c.deixou) {
-        tom = "passou"; selo = "Passou";
-        t.push("Você retirou " + rs(c.total - c.deixou) + " a mais do que a empresa deixou. O caixa da empresa diminuiu.");
-      } else if (c.total === c.deixou) {
-        tom = "coube"; selo = "Coube";
-        t.push("As suas retiradas usaram tudo o que a empresa deixou. Não sobrou nada na empresa.");
-      } else {
-        tom = "coube"; selo = "Coube";
-        t.push("As suas retiradas couberam no que a empresa deixou. Ficaram " + rs(c.ficou) + " na empresa.");
-      }
-      if (!c.temFixa) t.push("Use esses dois números para escolher a sua retirada fixa.");
-      blocos.push({ tom: tom, selo: selo, textos: t });
-    }
-    if (c.temFixa) {
-      if (c.total < m.fixa) blocos.push({ tom: "coube", selo: "Dentro do combinado", textos: ["Você está dentro da retirada fixa combinada de " + rs(m.fixa) + ". Ainda pode retirar " + rs(m.fixa - c.total) + "."] });
-      else if (c.total === m.fixa) blocos.push({ tom: "coube", selo: "Dentro do combinado", textos: ["Você chegou exatamente à retirada fixa combinada de " + rs(m.fixa) + "."] });
-      else blocos.push({ tom: "passou", selo: "Passou do combinado", textos: ["Você passou " + rs(c.total - m.fixa) + " da retirada fixa combinada de " + rs(m.fixa) + "."] });
-    }
-    return blocos;
+  // Situação do mês: vazio, preencher, primeiro (sem pró-labore) ou faixa A, B, C.
+  function situacao(m) {
+    var c = calcular(m);
+    if (c.qtd === 0) return { tipo: "vazio", c: c };
+    if (!c.temValores) return { tipo: "preencher", c: c };
+    var passouSobra = c.total > c.sobra;
+    if (!c.temProLabore) return { tipo: "primeiro", passouSobra: passouSobra, c: c };
+    if (passouSobra) return { tipo: "C", c: c };
+    if (c.total > m.proLabore) return { tipo: "B", c: c };
+    return { tipo: "A", c: c };
+  }
+
+  function etiquetaSituacao(s) {
+    if (s.tipo === "vazio") return { tom: "neutro", txt: "Sem retiradas" };
+    if (s.tipo === "preencher") return { tom: "neutro", txt: "Falta preencher" };
+    if (s.tipo === "primeiro") return s.passouSobra ? { tom: "passou", txt: "Passou da sobra" } : { tom: "coube", txt: "Coube na sobra" };
+    return { tom: FAIXAS[s.tipo].tom, txt: "Faixa " + s.tipo };
+  }
+
+  function totaisPorQuem(m) {
+    var tot = {}, ordem = [];
+    m.retiradas.forEach(function (r) {
+      var q = r.quem || NAO_INFORMADO;
+      if (!(q in tot)) { tot[q] = 0; ordem.push(q); }
+      tot[q] += r.valor;
+    });
+    var prefer = opcoesQuem();
+    ordem.sort(function (a, b) {
+      var ia = prefer.indexOf(a), ib = prefer.indexOf(b);
+      if (a === NAO_INFORMADO) ia = 999; if (b === NAO_INFORMADO) ib = 999;
+      return (ia < 0 ? 500 : ia) - (ib < 0 ? 500 : ib);
+    });
+    var juntos = atual().socios.length >= 2 ? juntarNomes(atual().socios) : null;
+    return ordem.map(function (q) { return { quem: q, rotulo: q === juntos ? q + " (juntos)" : q, total: tot[q] }; });
+  }
+
+  // Retiradas em ordem de data, com o total acumulado depois de cada uma.
+  function comAcumulado(m) {
+    var acum = 0;
+    return m.retiradas.slice().sort(function (a, b) { return a.data < b.data ? -1 : a.data > b.data ? 1 : 0; })
+      .map(function (r) { acum += r.valor; return { r: r, acum: acum }; });
   }
 
   /* ---------- Ajudantes de tela ---------- */
@@ -937,7 +1084,6 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
 
   /* ---------- Desenho das telas ---------- */
   function mostrarTela(nome, focar) {
-    telaAtual = nome;
     ["retiradas", "mes", "resultado", "historico", "dados"].forEach(function (t) {
       $("tela-" + t).hidden = (t !== nome);
     });
@@ -959,6 +1105,7 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     $("dadosExemploAviso").hidden = !exemplo;
     $("avisoArmazenamento").hidden = armazenamentoOk;
 
+    desenharQuem("rQuem");
     desenharRetiradas(m);
     desenharMes(m);
     desenharResultado(m);
@@ -971,26 +1118,42 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     rData.min = l.min; rData.max = l.max;
     if (!rData.value || rData.value < l.min || rData.value > l.max) rData.value = dataPadrao(atual().mesAberto);
 
-    var c = calcular(m);
+    var c = calcular(m), chave = atual().mesAberto;
     $("totalLista").textContent = rs(c.total);
-    $("h-lista").textContent = "Retiradas de " + NOMES_MESES[partes(atual().mesAberto).mes - 1];
+    $("avisoProLabore").hidden = !(c.temProLabore && c.qtd > 0 && c.total >= m.proLabore);
     var ul = $("listaRetiradas");
     if (!m.retiradas.length) {
       ul.innerHTML = '<li class="vazio">Nenhuma retirada anotada neste mês.</li>';
       return;
     }
-    var ord = m.retiradas.slice().sort(function (a, b) { return a.data < b.data ? -1 : a.data > b.data ? 1 : 0; });
-    ul.innerHTML = ord.map(function (r) {
-      var desc = esc(r.motivo) + ", " + dataBR(r.data) + ", " + rs(r.valor);
+    ul.innerHTML = comAcumulado(m).map(function (x) {
+      var r = x.r, quem = r.quem || NAO_INFORMADO;
+      var desc = esc(r.motivo) + ", " + dataExib(r.data, chave) + ", " + esc(quem) + ", " + rs(r.valor);
       return '<li class="item">' +
         '<div class="item-topo"><span class="item-motivo">' + esc(r.motivo) + '</span><span class="item-valor">' + rs(r.valor) + '</span></div>' +
-        '<div class="item-baixo"><span class="suave">' + dataBR(r.data) + '</span>' +
+        '<div class="item-info suave"><span>' + dataExib(r.data, chave) + '</span><span>Quem retirou: ' + esc(quem) + '</span></div>' +
+        '<div class="item-baixo"><span class="item-acum">Acumulado no mês: <strong>' + rs(x.acum) + '</strong></span>' +
         '<span class="item-acoes">' +
         '<button type="button" class="btn sec pequeno" data-corrigir="' + esc(r.id) + '" aria-label="Corrigir: ' + desc + '">Corrigir</button>' +
         '<button type="button" class="btn perigo pequeno" data-apagar="' + esc(r.id) + '" aria-label="Apagar: ' + desc + '">Apagar</button>' +
         '</span></div></li>';
     }).join("") +
-    '<li class="item"><div class="item-topo"><span class="item-motivo">Total (' + c.qtd + (c.qtd === 1 ? " retirada" : " retiradas") + ')</span><span class="item-valor">' + rs(c.total) + '</span></div></li>';
+    '<li class="item"><div class="item-topo"><span class="item-motivo">Total retirado (' + c.qtd + (c.qtd === 1 ? " retirada" : " retiradas") + ')</span><span class="item-valor">' + rs(c.total) + '</span></div></li>';
+  }
+
+  // Botões de "Quem retirou?"
+  function desenharQuem(alvo, extra) {
+    var grupo = document.querySelector('[data-quem-para="' + alvo + '"]'), input = $(alvo);
+    var ops = opcoesQuem(extra);
+    if (input.value && ops.indexOf(input.value) < 0) input.value = "";
+    if (!input.value && ops.length === 1) input.value = ops[0];
+    if (!ops.length) {
+      grupo.innerHTML = '<p class="dica">Ainda não há nomes de sócios. Toque em "Mudar os nomes dos sócios" para escrever.</p>';
+      return;
+    }
+    grupo.innerHTML = ops.map(function (q) {
+      return '<button type="button" class="chip" aria-pressed="' + (q === input.value) + '" data-quem="' + esc(q) + '">' + esc(q) + '</button>';
+    }).join("");
   }
 
   function preencherCampo(id, valor) {
@@ -1000,15 +1163,15 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
   }
 
   function desenharMes(m) {
-    preencherCampo("mEntrou", m.entrou);
-    preencherCampo("mGastou", m.gastou);
-    preencherCampo("mFixa", m.fixa);
-    $("h-mes").textContent = "Dados de " + nomeMes(atual().mesAberto);
+    preencherCampo("mReceita", m.receita);
+    preencherCampo("mGastos", m.gastos);
+    preencherCampo("mProLabore", m.proLabore);
+    preencherCampo("mCasa", m.dinheiroCasa);
     var c = calcular(m);
-    $("mDeixou").textContent = c.temValores ? rs(c.deixou) : "Preencha os dois campos acima";
-    var origem = $("mFixaOrigem");
-    if (m.fixaDe && m.fixa !== null) {
-      origem.textContent = "Valor trazido de " + nomeMes(m.fixaDe) + ". Pode mudar se quiser.";
+    $("mSobra").textContent = c.temValores ? rs(c.sobra) : "Preencha os dois campos acima";
+    var origem = $("mProLaboreOrigem");
+    if (m.proLaboreDe && m.proLabore !== null) {
+      origem.textContent = "Valor trazido de " + nomeMes(m.proLaboreDe) + ". Pode trocar se quiser.";
       origem.hidden = false;
     } else origem.hidden = true;
   }
@@ -1017,29 +1180,61 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     return '<div class="numero ' + (classe || "") + '"><span class="rot">' + rot + '</span><span class="val">' + val + '</span>' + (obs ? '<span class="obs">' + obs + '</span>' : "") + '</div>';
   }
 
+  function blocoLeitura(tom, selo, paragrafos, irMes) {
+    var icone = tom === "coube" ? "✓" : (tom === "passou" || tom === "atencao") ? "!" : "i";
+    return '<div class="leitura ' + tom + '"><span class="icone" aria-hidden="true">' + icone + '</span><div class="textos">' +
+      '<span class="selo">' + selo + '</span>' +
+      paragrafos.map(function (t) { return "<p>" + t + "</p>"; }).join("") +
+      (irMes ? '<div><button type="button" class="btn sec pequeno" data-ir="mes">Preencher agora</button></div>' : "") +
+      '</div></div>';
+  }
+
   function htmlLeitura(m) {
-    return leitura(m).map(function (b) {
-      var icone = b.tom === "coube" ? "✓" : b.tom === "passou" ? "!" : "i";
-      return '<div class="leitura ' + b.tom + '"><span class="icone" aria-hidden="true">' + icone + '</span><div class="textos">' +
-        '<span class="selo">' + b.selo + '</span>' +
-        b.textos.map(function (t) { return "<p>" + t + "</p>"; }).join("") +
-        (b.irMes ? '<div><button type="button" class="btn sec pequeno" data-ir="mes">Preencher agora</button></div>' : "") +
-        '</div></div>';
-    }).join("");
+    var s = situacao(m);
+    if (s.tipo === "vazio") return blocoLeitura("neutro", "Ainda sem resultado", ["Anote as suas retiradas para ver o resultado."]);
+    if (s.tipo === "preencher") return blocoLeitura("neutro", "Falta preencher", ["Preencha a receita do mês e os gastos da empresa sem o pró-labore para ver o resultado do mês."], true);
+    if (s.tipo === "primeiro") {
+      return blocoLeitura(s.passouSobra ? "passou" : "coube", s.passouSobra ? "Passou da sobra" : "Coube na sobra", [
+        s.passouSobra ? "Acima de 100,0%, a casa usou dinheiro que a empresa não deixou." : "Até 100,0%, as retiradas couberam na sobra.",
+        "Use esses números para fixar o pró-labore em um valor que caiba na sobra."
+      ]);
+    }
+    var f = FAIXAS[s.tipo];
+    return blocoLeitura(f.tom, "Faixa " + s.tipo, [f.criterio, "<strong>Decisão:</strong> " + f.decisao]);
   }
 
   function htmlNumeros(m) {
     var c = calcular(m), h = "";
+    h += cardNumero("Sobra da empresa", c.temValores ? rs(c.sobra) : "Falta preencher", c.temValores ? "Receita menos gastos sem o pró-labore" : "Na tela Mês");
     h += cardNumero("Total retirado", rs(c.total), c.qtd + (c.qtd === 1 ? " retirada" : " retiradas"));
-    h += cardNumero("Quanto a empresa deixou", c.temValores ? rs(c.deixou) : "Falta preencher", c.temValores ? "Entrou menos o que gastou" : "Na tela Mês");
+    if (!c.temValores) h += cardNumero("Parte da sobra usada pela casa", "Falta preencher", "Na tela Mês");
+    else if (c.parte === null) h += cardNumero("Parte da sobra usada pela casa", "Não dá para calcular", "A empresa não teve sobra", c.total > 0 ? "passou" : "");
+    else h += cardNumero("Parte da sobra usada pela casa", c.parte, "Total retirado dividido pela sobra", c.total > c.sobra ? "passou" : "coube");
     if (!c.temValores) h += cardNumero("Ficou na empresa", "Falta preencher", "Na tela Mês");
-    else if (c.ficou < 0) h += cardNumero("Faltou na empresa", rs(-c.ficou), "Você tirou mais do que a empresa deixou", "passou");
-    else h += cardNumero("Ficou na empresa", rs(c.ficou), "O que a empresa deixou menos o que você tirou", "coube");
-    if (c.temFixa) {
-      if (c.podeAinda < 0) h += cardNumero("Passou do combinado", rs(-c.podeAinda), "Retirada fixa: " + rs(m.fixa), "passou");
-      else h += cardNumero("Ainda pode retirar", rs(c.podeAinda), "Retirada fixa: " + rs(m.fixa), "coube");
+    else h += cardNumero("Ficou na empresa", rs(c.ficou), "Sobra menos total retirado", c.ficou < 0 ? "passou" : "coube");
+    if (c.temProLabore) {
+      if (c.podeAinda < 0) h += cardNumero("Passou do pró-labore combinado", rs(-c.podeAinda), "Pró-labore combinado: " + rs(m.proLabore), "passou");
+      else h += cardNumero("Ainda pode retirar", rs(c.podeAinda), "Pró-labore combinado: " + rs(m.proLabore), "coube");
     }
     return h;
+  }
+
+  function linha(rot, val) { return '<div class="linha"><span>' + rot + '</span><span>' + val + '</span></div>'; }
+  function htmlResumo(m) {
+    var c = calcular(m);
+    return linha("Receita do mês", m.receita === null ? "Não preenchida" : rs(m.receita)) +
+      linha("Gastos da empresa sem o pró-labore", m.gastos === null ? "Não preenchidos" : rs(m.gastos)) +
+      linha("Sobra da empresa", c.temValores ? rs(c.sobra) : "Falta preencher") +
+      linha("Pró-labore combinado", m.proLabore === null ? "Não combinado" : rs(m.proLabore)) +
+      linha("Total retirado", rs(c.total)) +
+      linha("Parte da sobra usada pela casa", !c.temValores ? "Falta preencher" : (c.parte === null ? "Não dá para calcular" : c.parte)) +
+      linha("Ficou na empresa", c.temValores ? rs(c.ficou) : "Falta preencher") +
+      linha("Dinheiro da casa colocado na empresa", m.dinheiroCasa === null ? "Nenhum" : rs(m.dinheiroCasa));
+  }
+  function htmlSocios(m) {
+    var t = totaisPorQuem(m);
+    if (!t.length) return '<p class="dica">Nenhuma retirada anotada neste mês.</p>';
+    return t.map(function (x) { return linha(esc(x.rotulo), rs(x.total)); }).join("");
   }
 
   function barra(rotulo, valor, escala, classe, nota) {
@@ -1054,19 +1249,20 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
   function htmlGraficoMes(m) {
     var c = calcular(m);
     if (!c.temValores && c.qtd === 0) return '<p class="suave">O gráfico aparece quando você anotar retiradas e preencher os dados do mês.</p>';
-    var esc = Math.max(c.temValores ? c.deixou : 0, c.total);
-    var resumo = c.temValores ? "A empresa deixou " + rs(c.deixou) + " e você retirou " + rs(c.total) + "." : "Você retirou " + rs(c.total) + ". Falta preencher quanto a empresa deixou.";
+    var escala = Math.max(c.temValores ? c.sobra : 0, c.total);
+    var resumo = c.temValores ? "Sobra da empresa " + rs(c.sobra) + ". Total retirado " + rs(c.total) + "." : "Total retirado " + rs(c.total) + ". Falta preencher a sobra da empresa.";
     var h = '<div class="grafico" role="img" aria-label="Gráfico. ' + resumo + '">';
-    if (c.temValores) h += barra("Quanto a empresa deixou", c.deixou, esc, "empresa", c.deixou < 0 ? "A empresa gastou mais do que entrou." : "");
-    else h += '<div class="barra-linha"><span class="barra-rot">Quanto a empresa deixou</span><span class="barra-nota">Falta preencher na tela Mês.</span></div>';
-    h += barra("Quanto você retirou", c.total, esc, "retirado");
+    if (c.temValores) h += barra("Sobra da empresa", c.sobra, escala, "empresa", c.sobra <= 0 ? "A empresa não teve sobra." : "");
+    else h += '<div class="barra-linha"><span class="barra-rot">Sobra da empresa</span><span class="barra-nota">Falta preencher na tela Mês.</span></div>';
+    h += barra("Total retirado", c.total, escala, "retirado");
     return h + "</div>";
   }
 
   function desenharResultado(m) {
-    $("h-resultado").textContent = "Resultado de " + nomeMes(atual().mesAberto);
     $("resLeitura").innerHTML = htmlLeitura(m);
     $("resNumeros").innerHTML = htmlNumeros(m);
+    $("resResumo").innerHTML = htmlResumo(m);
+    $("resSocios").innerHTML = htmlSocios(m);
     $("resGrafico").innerHTML = htmlGraficoMes(m);
 
     var lemb = $("lembreteCopia");
@@ -1082,29 +1278,35 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
 
   function desenharHistorico() {
     var d = atual(), ks = mesesOrdenados(d);
+
+    $("histTabela").innerHTML = '<table class="tabela" aria-labelledby="h-comparar"><thead><tr><th scope="col">Mês</th><th scope="col" class="v">Sobra</th><th scope="col" class="v">Total retirado</th><th scope="col">Faixa</th></tr></thead><tbody>' +
+      ks.map(function (k) {
+        var m = d.meses[k], c = calcular(m), e = etiquetaSituacao(situacao(m));
+        return '<tr><th scope="row">' + nomeMesTabela(k) + '</th><td class="v">' + (c.temValores ? rs(c.sobra) : "Falta") + '</td><td class="v">' + rs(c.total) + '</td><td>' + e.txt.replace("Faixa ", "") + '</td></tr>';
+      }).join("") + '</tbody></table>';
+
     var comValores = ks.filter(function (k) { return calcular(d.meses[k]).temValores; });
     var media = $("histMedia");
     if (comValores.length >= 2) {
       var soma = 0;
-      comValores.forEach(function (k) { soma += calcular(d.meses[k]).deixou; });
-      media.innerHTML = '<p class="rotulo">Média do que a empresa deixou</p><p class="val" style="font-size:1.5rem;font-weight:800">' + rs(Math.round(soma / comValores.length)) + '</p>' +
-        '<p class="dica">Média de ' + comValores.length + ' meses com os números preenchidos. É só uma informação para ajudar na sua decisão.</p>';
+      comValores.forEach(function (k) { soma += calcular(d.meses[k]).sobra; });
+      media.innerHTML = '<p class="rotulo">Média da sobra da empresa</p><p style="font-size:1.5rem;font-weight:800">' + rs(Math.round(soma / comValores.length)) + '</p>' +
+        '<p class="dica">Média de ' + comValores.length + ' meses com receita e gastos preenchidos. É só uma informação para ajudar na sua decisão.</p>';
     } else {
-      media.innerHTML = '<p class="rotulo">Média do que a empresa deixou</p><p class="dica">Aparece quando houver pelo menos 2 meses com "quanto entrou" e "quanto a empresa gastou" preenchidos.</p>';
+      media.innerHTML = '<p class="rotulo">Média da sobra da empresa</p><p class="dica">Aparece quando houver pelo menos 2 meses com a receita e os gastos preenchidos.</p>';
     }
 
     var escala = 0;
-    ks.forEach(function (k) { var c = calcular(d.meses[k]); escala = Math.max(escala, c.total, c.temValores ? c.deixou : 0); });
+    ks.forEach(function (k) { var c = calcular(d.meses[k]); escala = Math.max(escala, c.total, c.temValores ? c.sobra : 0); });
     $("histMeses").innerHTML = ks.map(function (k) {
-      var m = d.meses[k], c = calcular(m), etq;
-      if (!c.temValores) etq = '<span class="etiqueta neutro">Falta preencher</span>';
-      else if (c.total > c.deixou) etq = '<span class="etiqueta passou">Passou ' + rs(c.total - c.deixou) + '</span>';
-      else etq = '<span class="etiqueta coube">Coube</span>';
-      var resumo = nomeMes(k) + ". " + (c.temValores ? "A empresa deixou " + rs(c.deixou) + ". " : "Falta preencher quanto a empresa deixou. ") + "Você retirou " + rs(c.total) + ".";
-      return '<div class="mes-hist"><div class="mes-hist-topo"><h4 style="margin:0;font-size:1.1rem">' + nomeMesCurto(k) + (k === d.mesAberto ? ' <span class="suave">(aberto)</span>' : "") + '</h4>' + etq + '</div>' +
+      var m = d.meses[k], c = calcular(m), e = etiquetaSituacao(situacao(m));
+      var etq = '<span class="etiqueta ' + e.tom + '">' + e.txt + '</span>';
+      var parte = c.temValores && c.parte !== null ? '<span class="suave">Parte da sobra usada pela casa: ' + c.parte + '</span>' : "";
+      var resumo = nomeMes(k) + ". " + (c.temValores ? "Sobra da empresa " + rs(c.sobra) + ". " : "Falta preencher a sobra. ") + "Total retirado " + rs(c.total) + ".";
+      return '<div class="mes-hist"><div class="mes-hist-topo"><h4>' + nomeMesCurto(k) + (k === d.mesAberto ? ' <span class="suave">(aberto)</span>' : "") + '</h4>' + etq + '</div>' +
         '<div class="grafico" role="img" aria-label="' + esc(resumo) + '">' +
-        (c.temValores ? barra("Empresa deixou", c.deixou, escala, "empresa") : '<div class="barra-linha"><span class="barra-rot">Empresa deixou</span><span class="barra-nota">Falta preencher.</span></div>') +
-        barra("Você retirou", c.total, escala, "retirado") + '</div>' +
+        (c.temValores ? barra("Sobra da empresa", c.sobra, escala, "empresa") : '<div class="barra-linha"><span class="barra-rot">Sobra da empresa</span><span class="barra-nota">Falta preencher.</span></div>') +
+        barra("Total retirado", c.total, escala, "retirado") + '</div>' + parte +
         (k === d.mesAberto ? "" : '<div><button type="button" class="btn sec pequeno" data-abrir-mes="' + k + '">Abrir ' + nomeMes(k) + '</button></div>') +
         '</div>';
     }).join("");
@@ -1115,6 +1317,8 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     $("txtUltimaCopia").textContent = dados.ultimaCopia
       ? "Última cópia feita neste aparelho: " + dataBR(dados.ultimaCopia.slice(0, 10)) + "."
       : "Você ainda não fez nenhuma cópia neste aparelho.";
+    var s = atual().socios;
+    $("txtSocios").textContent = s.length ? "Sócios: " + juntarNomes(s) + "." : "Ainda não há nomes de sócios.";
     var ios = ehIphone();
     $("dadosIphone").hidden = !ios;
     $("dicaIphone").hidden = !(ios && !dados.dicaIphoneVista && !emTelaDeInicio());
@@ -1128,7 +1332,7 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     return window.navigator.standalone === true || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
   }
 
-  /* ---------- Botões de motivo ---------- */
+  /* ---------- Botões de motivo e de quem retirou ---------- */
   function montarChips() {
     document.querySelectorAll("[data-chips-para]").forEach(function (grupo) {
       var alvo = grupo.getAttribute("data-chips-para");
@@ -1151,6 +1355,15 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
       });
       $(alvo).addEventListener("input", function () { marcarChips(alvo); });
     });
+    document.querySelectorAll("[data-quem-para]").forEach(function (grupo) {
+      var alvo = grupo.getAttribute("data-quem-para");
+      grupo.addEventListener("click", function (ev) {
+        var b = ev.target.closest(".chip"); if (!b) return;
+        $(alvo).value = b.getAttribute("data-quem");
+        grupo.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+        erroCampo(alvo, "");
+      });
+    });
   }
   function marcarChips(alvo) {
     var v = $(alvo).value.trim().toLowerCase();
@@ -1162,25 +1375,28 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
 
   /* ---------- Validar retirada ---------- */
   function validarRetirada(pref) {
-    var ok = true, l = limitesMes(atual().mesAberto);
+    var ok = true, l = limitesMes(atual().mesAberto), primeiroErro = null;
+    function falhou(el) { ok = false; if (!primeiroErro) primeiroErro = el; }
     var v = lerValor($(pref + "Valor").value);
-    if (v === null) { erroCampo(pref + "Valor", "Digite quanto você tirou."); ok = false; }
-    else if (isNaN(v)) { erroCampo(pref + "Valor", "Não entendi o valor. Escreva assim: 1200 ou 1.200,50."); ok = false; }
-    else if (v <= 0) { erroCampo(pref + "Valor", "O valor precisa ser maior que zero."); ok = false; }
+    if (v === null) { erroCampo(pref + "Valor", "Digite quanto foi retirado."); falhou($(pref + "Valor")); }
+    else if (isNaN(v)) { erroCampo(pref + "Valor", "Não entendi o valor. Escreva assim: 1200 ou 1.200,50."); falhou($(pref + "Valor")); }
+    else if (v <= 0) { erroCampo(pref + "Valor", "O valor precisa ser maior que zero."); falhou($(pref + "Valor")); }
     else erroCampo(pref + "Valor", "");
     var mtv = $(pref + "Motivo").value.trim();
-    if (!mtv) { erroCampo(pref + "Motivo", "Escolha uma opção ou escreva para que foi."); ok = false; }
+    if (!mtv) { erroCampo(pref + "Motivo", "Escolha uma opção ou escreva para que foi."); falhou($(pref + "Motivo")); }
     else erroCampo(pref + "Motivo", "");
+    var quem = $(pref + "Quem").value;
+    var grupoQuem = document.querySelector('[data-quem-para="' + pref + 'Quem"]');
+    if (!quem) {
+      erroCampo(pref + "Quem", atual().socios.length ? "Escolha quem retirou." : "Escreva os nomes dos sócios antes, no botão \"Mudar os nomes dos sócios\".");
+      falhou(grupoQuem.querySelector("button") || document.querySelector("#campo-" + pref + "Quem .link-btn") || $(pref + "Valor"));
+    } else erroCampo(pref + "Quem", "");
     var dt = $(pref + "Data").value;
-    if (!dt) { erroCampo(pref + "Data", "Escolha a data."); ok = false; }
-    else if (dt < l.min || dt > l.max) { erroCampo(pref + "Data", "Essa data não é de " + nomeMes(atual().mesAberto) + ". Escolha uma data deste mês ou troque de mês lá em cima."); ok = false; }
+    if (!dt) { erroCampo(pref + "Data", "Escolha a data."); falhou($(pref + "Data")); }
+    else if (dt < l.min || dt > l.max) { erroCampo(pref + "Data", "Essa data não é de " + nomeMes(atual().mesAberto) + ". Escolha uma data deste mês ou troque de mês lá em cima."); falhou($(pref + "Data")); }
     else erroCampo(pref + "Data", "");
-    if (!ok) {
-      var primeiro = document.querySelector("#" + (pref === "r" ? "formRetirada" : "formEditar") + " [aria-invalid='true']");
-      if (primeiro) primeiro.focus();
-      return null;
-    }
-    return { valor: v, motivo: mtv, data: dt };
+    if (!ok) { if (primeiroErro) primeiroErro.focus(); return null; }
+    return { valor: v, motivo: mtv, quem: quem, data: dt };
   }
 
   /* ---------- Ações ---------- */
@@ -1188,13 +1404,16 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     ev.preventDefault();
     var r = validarRetirada("r");
     if (!r) return;
+    var m = mesAberto(), antes = calcular(m).total;
     r.id = novoId();
-    mesAberto().retiradas.push(r);
+    m.retiradas.push(r);
     salvar();
     $("rValor").value = ""; $("rMotivo").value = ""; marcarChips("rMotivo");
     $("rMotivo").placeholder = "Ex.: farmácia";
     desenhar();
-    avisar("Retirada de " + rs(r.valor) + " anotada.");
+    var depois = calcular(m).total;
+    if (m.proLabore !== null && antes < m.proLabore && depois >= m.proLabore) avisar("As retiradas do mês chegaram ao pró-labore combinado.");
+    else avisar("Retirada de " + rs(r.valor) + " anotada.");
     $("rValor").focus();
   }
 
@@ -1205,9 +1424,11 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     var l = limitesMes(atual().mesAberto);
     $("eValor").value = semRS(r.valor);
     $("eMotivo").value = r.motivo;
+    $("eQuem").value = r.quem || "";
     $("eData").min = l.min; $("eData").max = l.max; $("eData").value = r.data;
-    ["eValor", "eMotivo", "eData"].forEach(function (i) { erroCampo(i, ""); });
+    ["eValor", "eMotivo", "eQuem", "eData"].forEach(function (i) { erroCampo(i, ""); });
     marcarChips("eMotivo");
+    desenharQuem("eQuem", r.quem);
     abrir($("dlgEditar"));
     $("eValor").focus();
   }
@@ -1217,7 +1438,7 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     var novo = validarRetirada("e");
     if (!novo) return;
     var r = mesAberto().retiradas.filter(function (x) { return x.id === editandoId; })[0];
-    if (r) { r.valor = novo.valor; r.motivo = novo.motivo; r.data = novo.data; }
+    if (r) { r.valor = novo.valor; r.motivo = novo.motivo; r.quem = novo.quem; r.data = novo.data; }
     salvar(); fechar($("dlgEditar")); desenhar();
     avisar("Retirada corrigida.");
   }
@@ -1225,13 +1446,32 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
   function apagarRetirada(id) {
     var m = mesAberto(), r = m.retiradas.filter(function (x) { return x.id === id; })[0];
     if (!r) return;
-    confirmar("Apagar esta retirada?", r.motivo + ", " + dataBR(r.data) + ", " + rs(r.valor) + ".", "Apagar").then(function (sim) {
+    confirmar("Apagar esta retirada?", r.motivo + ", " + dataExib(r.data, atual().mesAberto) + ", " + (r.quem || NAO_INFORMADO) + ", " + rs(r.valor) + ".", "Apagar").then(function (sim) {
       if (!sim) return;
       m.retiradas = m.retiradas.filter(function (x) { return x.id !== id; });
       salvar(); desenhar();
       avisar("Retirada apagada.");
       $("rValor").focus();
     });
+  }
+
+  function abrirSocios() {
+    fechar($("dlgMenu"));
+    var s = atual().socios;
+    for (var i = 1; i <= 4; i++) $("sNome" + i).value = s[i - 1] || "";
+    $("sErro").hidden = true;
+    abrir($("dlgSocios"));
+    $("sNome1").focus();
+  }
+  function salvarSocios(ev) {
+    ev.preventDefault();
+    var nomes = [];
+    for (var i = 1; i <= 4; i++) nomes.push($("sNome" + i).value);
+    nomes = limparNomes(nomes);
+    if (!nomes.length) { $("sErro").textContent = "Escreva pelo menos um nome."; $("sErro").hidden = false; $("sNome1").focus(); return; }
+    atual().socios = nomes;
+    salvar(); fechar($("dlgSocios")); desenhar();
+    avisar(exemplo ? "Nomes trocados só no exemplo." : "Nomes dos sócios salvos.");
   }
 
   function campoMes(id, prop) {
@@ -1243,12 +1483,13 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
       var m = mesAberto();
       if (m[prop] !== v) {
         m[prop] = v;
-        if (prop === "fixa") delete m.fixaDe;
+        if (prop === "proLabore") delete m.proLaboreDe;
         salvar();
         $("mSalvo").textContent = exemplo ? "Alterado só no exemplo." : "Salvo.";
       }
       if (final) el.value = v === null ? "" : semRS(v);
       desenharMes(m);
+      desenharRetiradas(m);
       desenharResultado(m);
     }
     el.addEventListener("input", function () { aplicar(false); });
@@ -1291,24 +1532,24 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     abrir($("dlgNovoMes"));
     $("nMes").focus();
   }
-  function mesAnteriorCom(chave) {
-    var ks = mesesOrdenados(atual()).filter(function (k) { return k < chave; });
+  // Mês anterior mais próximo que tem pró-labore combinado.
+  function mesAnteriorComProLabore(chave) {
+    var d = atual(), ks = mesesOrdenados(d).filter(function (k) { return k < chave && d.meses[k].proLabore !== null; });
     return ks.length ? ks[ks.length - 1] : null;
   }
   function atualizarAvisoNovoMes() {
     var chave = chaveDe(+$("nAno").value, +$("nMes").value), d = atual();
     if (d.meses[chave]) { $("nAviso").textContent = "Esse mês já existe. Toque em Abrir para ver."; $("nCriar").textContent = "Abrir"; return; }
     $("nCriar").textContent = "Criar";
-    var ant = mesAnteriorCom(chave);
-    if (ant && d.meses[ant].fixa !== null) $("nAviso").textContent = "A retirada fixa de " + nomeMes(ant) + " (" + rs(d.meses[ant].fixa) + ") já vem preenchida.";
-    else $("nAviso").textContent = "";
+    var ant = mesAnteriorComProLabore(chave);
+    $("nAviso").textContent = ant ? "O pró-labore combinado de " + nomeMes(ant) + " (" + rs(d.meses[ant].proLabore) + ") já vem preenchido." : "";
   }
   function criarMes(ev) {
     ev.preventDefault();
     var chave = chaveDe(+$("nAno").value, +$("nMes").value), d = atual();
     if (!d.meses[chave]) {
-      var m = mesVazio(), ant = mesAnteriorCom(chave);
-      if (ant && d.meses[ant].fixa !== null) { m.fixa = d.meses[ant].fixa; m.fixaDe = ant; }
+      var m = mesVazio(), ant = mesAnteriorComProLabore(chave);
+      if (ant) { m.proLabore = d.meses[ant].proLabore; m.proLaboreDe = ant; }
       d.meses[chave] = m;
     }
     fechar($("dlgNovoMes"));
@@ -1329,11 +1570,12 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
   }
 
   function apagarTudo() {
-    confirmar("Apagar todos os dados?", "Todos os meses e retiradas deste aparelho vão ser apagados. Não dá para desfazer, a não ser que você tenha uma cópia de segurança.", "Apagar tudo").then(function (sim) {
+    confirmar("Apagar todos os dados?", "Todos os meses, retiradas e nomes de sócios deste aparelho vão ser apagados. Não dá para desfazer, a não ser que você tenha uma cópia de segurança.", "Apagar tudo").then(function (sim) {
       if (!sim) return;
       var viu = dados.viuPassoAPasso, dica = dados.dicaIphoneVista;
       dados = dadosVazios(); dados.viuPassoAPasso = viu; dados.dicaIphoneVista = dica;
       garantirMes(dados);
+      $("rQuem").value = "";
       salvar(); mostrarTela("retiradas");
       avisar("Todos os dados foram apagados.");
     });
@@ -1351,7 +1593,7 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
 
   function celula(v) {
     if (v === null || v === undefined) return "";
-    if (typeof v === "number") return semRS(v).replace(/\./g, ""); // ex.: 1200,50
+    if (typeof v === "number") return (v < 0 ? "-" : "") + semRS(v).replace(/\./g, ""); // ex.: 1200,50
     var s = String(v);
     if (/^[=+\-@]/.test(s)) s = "'" + s;
     if (/[;"\r\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
@@ -1364,29 +1606,33 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     linhas.push(["Baixado em " + dataBR(hojeISO())]);
     linhas.push([]);
     linhas.push(["RESUMO POR MÊS"]);
-    linhas.push(["Mês", "Quanto entrou", "Quanto a empresa gastou", "Quanto a empresa deixou", "Total retirado", "Ficou na empresa", "Retirada fixa combinada"]);
+    linhas.push(["Mês", "Receita do mês", "Gastos da empresa sem o pró-labore", "Sobra da empresa", "Pró-labore combinado", "Total retirado", "Parte da sobra usada pela casa", "Ficou na empresa", "Faixa do mês", "Dinheiro da casa colocado na empresa"]);
     ks.forEach(function (k) {
       var m = dados.meses[k], c = calcular(m);
-      linhas.push([nomeMesCurto(k), m.entrou, m.gastou, c.deixou, c.total, c.ficou, m.fixa]);
+      linhas.push([nomeMesCurto(k), m.receita, m.gastos, c.sobra, m.proLabore, c.total, c.parte, c.ficou, etiquetaSituacao(situacao(m)).txt, m.dinheiroCasa]);
     });
     linhas.push([]);
     linhas.push(["RETIRADAS"]);
-    linhas.push(["Mês", "Data", "Para que foi", "Valor"]);
+    linhas.push(["Mês", "Data", "Para que foi", "Quem retirou", "Valor", "Acumulado no mês"]);
     ks.forEach(function (k) {
-      dados.meses[k].retiradas.slice().sort(function (a, b) { return a.data < b.data ? -1 : 1; }).forEach(function (r) {
-        linhas.push([nomeMesCurto(k), dataBR(r.data), r.motivo, r.valor]);
+      comAcumulado(dados.meses[k]).forEach(function (x) {
+        linhas.push([nomeMesCurto(k), dataBR(x.r.data), x.r.motivo, x.r.quem || NAO_INFORMADO, x.r.valor, x.acum]);
       });
     });
-    var csv = linhas.map(function (l) {
-      return l.map(function (v) { return typeof v === "number" && v < 0 ? "-" + celula(-v) : celula(v); }).join(";");
-    }).join("\r\n");
+    linhas.push([]);
+    linhas.push(["TOTAL RETIRADO POR SÓCIO"]);
+    linhas.push(["Mês", "Quem retirou", "Total"]);
+    ks.forEach(function (k) {
+      totaisPorQuem(dados.meses[k]).forEach(function (x) { linhas.push([nomeMesCurto(k), x.rotulo, x.total]); });
+    });
+    var csv = linhas.map(function (l) { return l.map(celula).join(";"); }).join("\r\n");
     baixar("retiradas-do-dono-" + hojeISO() + ".csv", "﻿" + csv, "text/csv;charset=utf-8");
     avisar("Planilha baixada.");
   }
 
   function fazerCopia() {
     dados.ultimaCopia = new Date().toISOString();
-    var pacote = { app: "controle-retiradas-do-dono", versao: 1, feitaEm: dados.ultimaCopia, dados: dados };
+    var pacote = { app: "controle-retiradas-do-dono", versao: 2, feitaEm: dados.ultimaCopia, dados: dados };
     baixar("copia-retiradas-" + hojeISO() + ".json", JSON.stringify(pacote, null, 2), "application/json");
     salvar(); desenhar();
     avisar("Cópia de segurança baixada.");
@@ -1411,6 +1657,7 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
         novos.viuPassoAPasso = true;
         novos.ultimaCopia = pacote.feitaEm || novos.ultimaCopia;
         dados = novos; garantirMes(dados);
+        $("rQuem").value = "";
         salvar(); mostrarTela("retiradas");
         avisar("Cópia restaurada.");
       });
@@ -1420,24 +1667,22 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
 
   /* ---------- Impressão ---------- */
   function imprimir() {
-    var d = atual(), m = mesAberto(), c = calcular(m);
-    var linhas = m.retiradas.slice().sort(function (a, b) { return a.data < b.data ? -1 : 1; }).map(function (r) {
-      return "<tr><td>" + dataBR(r.data) + "</td><td>" + esc(r.motivo) + '</td><td class="v">' + rs(r.valor) + "</td></tr>";
+    var d = atual(), m = mesAberto(), c = calcular(m), chave = d.mesAberto;
+    var linhasTab = comAcumulado(m).map(function (x) {
+      return "<tr><td>" + dataExib(x.r.data, chave) + "</td><td>" + esc(x.r.motivo) + "</td><td>" + esc(x.r.quem || NAO_INFORMADO) + '</td><td class="v">' + rs(x.r.valor) + '</td><td class="v">' + rs(x.acum) + "</td></tr>";
     }).join("");
+    var tabelaSocios = totaisPorQuem(m).map(function (x) { return "<tr><td>" + esc(x.rotulo) + '</td><td class="v">' + rs(x.total) + "</td></tr>"; }).join("");
     $("impressao").innerHTML =
       '<p>' + esc(PERSONALIZACAO.nomeDoEbook) + ' · ' + esc(PERSONALIZACAO.capitulo) + (exemplo ? " · EXEMPLO" : "") + '</p>' +
-      '<h1>' + esc(PERSONALIZACAO.nomeDaFerramenta) + ': ' + nomeMes(d.mesAberto) + '</h1>' +
-      '<h2>Dados do mês</h2><table>' +
-      '<tr><td>Quanto entrou</td><td class="v">' + (m.entrou === null ? "não preenchido" : rs(m.entrou)) + '</td></tr>' +
-      '<tr><td>Quanto a empresa gastou</td><td class="v">' + (m.gastou === null ? "não preenchido" : rs(m.gastou)) + '</td></tr>' +
-      '<tr><td>Quanto a empresa deixou</td><td class="v">' + (c.temValores ? rs(c.deixou) : "não calculado") + '</td></tr>' +
-      '<tr><td>Retirada fixa combinada</td><td class="v">' + (m.fixa === null ? "não definida" : rs(m.fixa)) + '</td></tr></table>' +
-      '<h2>Resultado</h2>' + htmlLeitura(m).replace(/<button[\s\S]*?<\/button>/g, "") +
+      '<h1>' + esc(PERSONALIZACAO.nomeDaFerramenta) + ': ' + esc(nomeMes(chave)) + '</h1>' +
+      '<h2>Resultado</h2>' + htmlLeitura(m).replace(/<div><button[\s\S]*?<\/button><\/div>/g, "") +
       '<div class="numeros">' + htmlNumeros(m) + '</div>' +
+      '<h2>Resumo do mês</h2><table>' + htmlResumo(m).replace(/<div class="linha"><span>([\s\S]*?)<\/span><span>([\s\S]*?)<\/span><\/div>/g, '<tr><td>$1</td><td class="v">$2</td></tr>') + '</table>' +
+      '<h2>Total retirado por sócio</h2>' + (tabelaSocios ? "<table>" + tabelaSocios + "</table>" : "<p>Nenhuma retirada anotada.</p>") +
       htmlGraficoMes(m) +
       '<h2>Retiradas</h2>' +
-      (linhas ? '<table><thead><tr><th>Data</th><th>Para que foi</th><th class="v">Valor</th></tr></thead><tbody>' + linhas +
-        '<tr><td></td><td><strong>Total</strong></td><td class="v"><strong>' + rs(c.total) + '</strong></td></tr></tbody></table>' : "<p>Nenhuma retirada anotada.</p>") +
+      (linhasTab ? '<table><thead><tr><th>Data</th><th>Para que foi</th><th>Quem retirou</th><th class="v">Valor</th><th class="v">Acumulado</th></tr></thead><tbody>' + linhasTab +
+        '<tr><td></td><td><strong>Total retirado</strong></td><td></td><td class="v"><strong>' + rs(c.total) + '</strong></td><td></td></tr></tbody></table>' : "<p>Nenhuma retirada anotada.</p>") +
       '<p style="margin-top:14pt">' + esc(avisoEducativo()) + ' Impresso em ' + dataBR(hojeISO()) + '.</p>';
     window.print();
   }
@@ -1467,13 +1712,13 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
   function entrarExemplo() {
     exemplo = montarExemplo();
     fechar($("dlgMenu"));
-    $("rData").value = "";
+    $("rData").value = ""; $("rQuem").value = "";
     mostrarTela("resultado");
   }
   function sairExemplo() {
     exemplo = null;
     fechar($("dlgMenu"));
-    $("rData").value = "";
+    $("rData").value = ""; $("rQuem").value = "";
     mostrarTela("retiradas");
     avisar("Você voltou para os seus dados.");
   }
@@ -1490,11 +1735,13 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
     $("formRetirada").addEventListener("submit", anotarRetirada);
     $("formEditar").addEventListener("submit", salvarCorrecao);
     $("formNovoMes").addEventListener("submit", criarMes);
+    $("formSocios").addEventListener("submit", salvarSocios);
     $("nMes").addEventListener("change", atualizarAvisoNovoMes);
     $("nAno").addEventListener("change", atualizarAvisoNovoMes);
-    campoMes("mEntrou", "entrou");
-    campoMes("mGastou", "gastou");
-    campoMes("mFixa", "fixa");
+    campoMes("mReceita", "receita");
+    campoMes("mGastos", "gastos");
+    campoMes("mProLabore", "proLabore");
+    campoMes("mCasa", "dinheiroCasa");
     ["rValor", "eValor"].forEach(function (id) {
       $(id).addEventListener("blur", function () { var v = lerValor(this.value); if (v > 0) this.value = semRS(v); });
     });
@@ -1529,6 +1776,7 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
       else if (acao === "apagarMes") apagarMes();
       else if (acao === "apagarTudo") apagarTudo();
       else if (acao === "novoMes") abrirNovoMes();
+      else if (acao === "socios") abrirSocios();
       else if (acao === "passoAPasso") abrirPassos();
       else if (acao === "explicaRetirada") { fechar($("dlgMenu")); abrir($("dlgExplica")); }
       else if (acao === "exemplo") { if (exemplo) sairExemplo(); else entrarExemplo(); }
@@ -1550,7 +1798,7 @@ select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; 
   if (!dados.viuPassoAPasso) abrirPassos();
 
   // Usado só nos testes automáticos.
-  window.__ferramenta = { lerValor: lerValor, rs: rs, leitura: leitura, calcular: calcular };
+  window.__ferramenta = { lerValor: lerValor, textoParte: textoParte, situacao: situacao, calcular: calcular };
 })();
 </script>
 </body>
