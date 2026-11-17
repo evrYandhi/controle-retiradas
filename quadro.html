@@ -1,0 +1,1724 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quadro dos 4 indicadores</title>
+<meta name="description" content="Ferramenta educativa da Conclusão do e-book: quadro semanal, ciclo financeiro, teste do livro e plano de 30 dias.">
+
+<script>
+/* =====================================================================
+   1) PERSONALIZAÇÃO
+   É uma cópia do mesmo bloco do index.html. Se mudar o nome do e-book
+   ou as cores lá, mude aqui também, para as duas páginas ficarem iguais.
+   ===================================================================== */
+var PERSONALIZACAO = {
+  nomeDoEbook: "E-book de Gestão Financeira",
+  parteDoLivro: "Conclusão",
+  nomeDaFerramenta: "Quadro dos 4 indicadores",
+
+  fonte: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+
+  cores: {
+    fundo:          "#F2F5F3", // fundo da página
+    cartao:         "#FFFFFF", // fundo das caixas
+    texto:          "#1D2A25", // texto principal
+    textoSuave:     "#4A5953", // dicas e textos menores
+    borda:          "#C9D4CE", // linhas e contornos
+    principal:      "#2B5A87", // botões e destaques
+    principalClaro: "#E4EDF6", // fundo de botões selecionados
+    coube:          "#1D6B3F", // verde: faixa 3
+    coubeFundo:     "#E2F2E7",
+    atencao:        "#7A4E00", // amarelo-escuro: faixa 2
+    atencaoFundo:   "#FFF3D6",
+    passou:         "#AE2A1F", // vermelho: faixa 1
+    passouFundo:    "#FBE8E5",
+    aviso:          "#6E5200", // faixa do modo exemplo
+    avisoFundo:     "#FFF1BF"
+  }
+};
+
+/* =====================================================================
+   2) DADOS DO EXEMPLO
+   É o que aparece no botão "Ver o exemplo da Brasa no Bairro". Não
+   mistura com os dados da pessoa. Troque só o que está entre aspas.
+   - Valores: escreva como no dia a dia, entre aspas ("6.800").
+   - "mes" é o número do mês do negócio (mês 1, mês 2...), não do calendário.
+   ===================================================================== */
+var EXEMPLO = {
+  nome: "Brasa no Bairro",
+
+  // Quadro da semana
+  quadro: {
+    dia: 1,
+    mes: 4,
+    caixa: "6.800",
+    contasAReceber: "22.995",
+    estoque: "5.200",
+    fornecedores: "3.700",
+    salariosEEncargos: "4.600",
+    impostos: "2.730",
+    parcelasDeEmprestimo: "2.190",
+    totalDeSaidasDoMes: "41.883"
+  },
+
+  // Parte do mês (estoque e fornecedores vêm do quadro acima)
+  parteDoMes: {
+    mes: 3,
+    custoDaMercadoria: "15.960",
+    receitaDoMes: "41.990",
+    receitaAPrazo: "22.995",
+    diasParaReceber: "30"
+  },
+
+  // Plano de ação: ["número da semana", "ação da semana", capítulo de apoio]
+  plano: [
+    ["Saldo disponível", "Pedir ao fornecedor de insumo um prazo maior que os 7 dias atuais", 3]
+  ]
+};
+/* ===================== FIM DAS PARTES PARA TROCAR ===================== */
+</script>
+
+<script>
+  // Aplica as cores e a fonte da personalização (não precisa mexer aqui).
+  (function () {
+    var s = document.documentElement.style, c = PERSONALIZACAO.cores;
+    for (var k in c) s.setProperty("--" + k, c[k]);
+    s.setProperty("--fonte", PERSONALIZACAO.fonte);
+  })();
+</script>
+
+<style>
+/* Layout: o mesmo do Controle de retiradas. Uma coluna estreita, barra de navegação fixa embaixo. */
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 18px;
+  line-height: 1.5;
+}
+[hidden] { display: none !important; }
+button, input, select { font: inherit; color: inherit; }
+h1, h2, h3, h4 { line-height: 1.25; text-wrap: balance; margin: 0; }
+h2 { font-size: 1.45rem; }
+h3 { font-size: 1.15rem; }
+h4 { font-size: 1.05rem; }
+p { margin: 0; }
+a { color: var(--principal); }
+:focus-visible { outline: 3px solid var(--principal); outline-offset: 2px; }
+
+.pagina {
+  max-width: 640px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px calc(110px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Faixa do modo exemplo */
+.faixa-exemplo {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--avisoFundo); color: var(--aviso);
+  border-bottom: 2px solid var(--aviso);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px;
+}
+.faixa-exemplo .dentro { max-width: 640px; margin: 0 auto; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.faixa-exemplo p { font-weight: 600; flex: 1 1 220px; }
+
+/* Topo */
+.topo { display: grid; gap: 10px; padding-block: 8px 16px; }
+.topo-linha { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+.ebook { font-size: 1rem; color: var(--textoSuave); }
+.topo h1 { font-size: 1.35rem; }
+.link-pagina { display: inline-block; padding-block: 8px; font-weight: 700; }
+.seletor {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; min-height: 56px; padding: 10px 16px;
+  background: var(--cartao); border: 2px solid var(--borda); border-radius: 12px;
+  cursor: pointer; text-align: left;
+}
+.seletor strong { font-size: 1.2rem; }
+.seletor span { color: var(--principal); font-weight: 600; font-size: 1rem; white-space: nowrap; }
+
+/* Botões */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 52px; padding: 10px 20px;
+  border-radius: 12px; border: 2px solid var(--principal);
+  background: var(--principal); color: #fff;
+  font-weight: 700; cursor: pointer; text-align: center;
+}
+.btn.sec { background: var(--cartao); color: var(--principal); }
+.btn.perigo { background: var(--cartao); color: var(--passou); border-color: var(--passou); }
+.btn.perigo-cheio { background: var(--passou); border-color: var(--passou); color: #fff; }
+.btn.pequeno { min-height: 44px; padding: 6px 14px; font-size: 1rem; }
+.btn.largo { width: 100%; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.botoes { display: flex; flex-wrap: wrap; gap: 10px; }
+.botoes .btn { flex: 1 1 160px; }
+.pilha { display: grid; gap: 12px; }
+
+/* Seções */
+.secao { display: grid; gap: 20px; }
+.secao > h2 { padding-top: 4px; }
+.caixa {
+  background: var(--cartao); border: 1px solid var(--borda); border-radius: 16px;
+  padding: 18px; display: grid; gap: 16px; min-width: 0;
+}
+.suave { color: var(--textoSuave); font-size: 1rem; }
+
+/* Campos */
+.campo { display: grid; gap: 6px; }
+.campo > label, .rotulo { font-weight: 700; font-size: 1.1rem; }
+.dica { color: var(--textoSuave); font-size: 1rem; }
+.entrada {
+  display: flex; align-items: center; min-height: 56px;
+  background: var(--cartao); border: 2px solid var(--borda); border-radius: 12px; padding: 0 14px;
+}
+.entrada:focus-within { border-color: var(--principal); }
+.entrada .prefixo, .entrada .sufixo { color: var(--textoSuave); font-weight: 600; }
+.entrada .prefixo { margin-right: 8px; }
+.entrada .sufixo { margin-left: 8px; }
+.entrada textarea { border: 0; background: transparent; outline: none; width: 100%; min-width: 0; font: inherit; font-size: 1.1rem; padding: 10px 0; resize: vertical; }
+.entrada input { border: 0; background: transparent; outline: none; width: 100%; min-width: 0; min-height: 52px; font-size: 1.25rem; }
+input[type="date"] { font-size: 1.15rem; }
+.campo.erro .entrada { border-color: var(--passou); }
+.msg-erro { color: var(--passou); font-weight: 600; font-size: 1rem; }
+.salvo { color: var(--coube); font-size: 1rem; font-weight: 600; min-height: 1.5em; }
+.num-linha { color: var(--textoSuave); font-weight: 700; margin-right: 4px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  min-height: 46px; padding: 8px 14px; border-radius: 999px; text-align: left;
+  border: 2px solid var(--borda); background: var(--cartao); cursor: pointer; font-size: 1rem;
+}
+.chip[aria-pressed="true"] { border-color: var(--principal); background: var(--principalClaro); color: var(--principal); font-weight: 700; }
+
+/* Destaque do saldo disponível */
+.destaque { background: var(--cartao); border: 2px solid var(--principal); border-radius: 16px; padding: 18px; display: grid; gap: 4px; }
+.destaque .rot { font-weight: 700; color: var(--principal); }
+.destaque .val { font-size: 2.2rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.destaque .val.negativo { color: var(--passou); }
+
+/* Leituras (faixas e avisos) */
+.leitura { border-radius: 16px; padding: 18px; display: flex; gap: 14px; align-items: flex-start; border: 2px solid var(--borda); background: var(--cartao); }
+.leitura .icone { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 1.2rem; background: var(--principalClaro); color: var(--principal); }
+.leitura .textos { display: grid; gap: 6px; min-width: 0; }
+.leitura .selo { font-weight: 800; text-transform: uppercase; letter-spacing: .04em; font-size: .95rem; }
+.leitura p { font-size: 1.1rem; }
+.leitura.coube { background: var(--coubeFundo); border-color: var(--coube); }
+.leitura.coube .icone { background: var(--coube); color: #fff; }
+.leitura.coube .selo { color: var(--coube); }
+.leitura.atencao { background: var(--atencaoFundo); border-color: var(--atencao); }
+.leitura.atencao .icone { background: var(--atencao); color: #fff; }
+.leitura.atencao .selo { color: var(--atencao); }
+.leitura.passou { background: var(--passouFundo); border-color: var(--passou); }
+.leitura.passou .icone { background: var(--passou); color: #fff; }
+.leitura.passou .selo { color: var(--passou); }
+.meta { display: grid; gap: 2px; padding-top: 6px; border-top: 1px solid var(--borda); }
+
+/* Indicadores em linhas: nome e valor, explicação embaixo */
+.indicadores { display: grid; }
+.ind { display: grid; gap: 2px; padding: 12px 0; border-top: 1px solid var(--borda); }
+.ind:first-child { border-top: 0; padding-top: 0; }
+.ind-topo { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.ind-nome { font-weight: 700; min-width: 0; }
+.ind-val { font-weight: 800; font-size: 1.2rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ind-exp { color: var(--textoSuave); font-size: 1rem; }
+.ind.menor .ind-nome { font-weight: 600; font-size: 1rem; }
+.ind.menor .ind-val { font-size: 1rem; font-weight: 700; }
+.ind.principal .ind-val { font-size: 1.5rem; }
+.val-texto { font-weight: 700; color: var(--passou); font-size: 1rem; white-space: normal; text-align: right; }
+
+/* Teste do livro */
+.pergunta { display: grid; gap: 10px; padding: 14px 0; border-top: 1px solid var(--borda); }
+.pergunta:first-child { border-top: 0; padding-top: 0; }
+.pergunta p { font-weight: 600; }
+.sim-nao { display: flex; gap: 10px; }
+.sim-nao .chip { flex: 1 1 0; text-align: center; font-size: 1.05rem; }
+
+/* Plano */
+.semana-plano { display: grid; gap: 14px; }
+.check { display: flex; align-items: center; gap: 12px; min-height: 48px; font-weight: 700; cursor: pointer; }
+.check input { width: 28px; height: 28px; accent-color: var(--coube); }
+details.sugestoes summary { cursor: pointer; color: var(--principal); font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+details.sugestoes .chips { padding-top: 8px; }
+select { min-height: 56px; border: 2px solid var(--borda); border-radius: 12px; background: var(--cartao); padding: 0 12px; font-size: 1.1rem; width: 100%; }
+.duas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Listas do histórico */
+.lista { list-style: none; margin: 0; padding: 0; display: grid; }
+.item { display: grid; gap: 6px; padding: 14px 0; border-top: 1px solid var(--borda); }
+.item:first-child { border-top: 0; padding-top: 0; }
+.item-topo { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+.item-info { display: flex; flex-wrap: wrap; gap: 4px 16px; font-variant-numeric: tabular-nums; }
+.etiqueta { display: inline-block; border-radius: 999px; padding: 2px 12px; font-size: 1rem; font-weight: 700; border: 2px solid var(--borda); white-space: nowrap; }
+.etiqueta.coube { color: var(--coube); background: var(--coubeFundo); border-color: var(--coube); }
+.etiqueta.atencao { color: var(--atencao); background: var(--atencaoFundo); border-color: var(--atencao); }
+.etiqueta.passou { color: var(--passou); background: var(--passouFundo); border-color: var(--passou); }
+.etiqueta.neutro { color: var(--textoSuave); }
+.vazio { color: var(--textoSuave); }
+details.anteriores summary { cursor: pointer; font-weight: 700; color: var(--principal); min-height: 44px; display: flex; align-items: center; }
+
+.rodape { display: grid; gap: 6px; color: var(--textoSuave); font-size: 1rem; padding-top: 8px; border-top: 1px solid var(--borda); }
+
+/* Navegação de baixo */
+.nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  background: var(--cartao); border-top: 1px solid var(--borda);
+  padding-left: max(4px, env(safe-area-inset-left, 0px));
+  padding-right: max(4px, env(safe-area-inset-right, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.nav ul { list-style: none; margin: 0 auto; padding: 0; max-width: 640px; display: flex; }
+/* Cada aba ocupa pelo menos a largura do próprio nome em negrito, para "Histórico" caber em celulares estreitos. */
+.nav li { flex: 1 1 0; min-width: max-content; }
+.nav .rot { display: inline-flex; flex-direction: column; align-items: center; }
+.nav .rot::after { content: attr(data-t); font-weight: 800; height: 0; visibility: hidden; overflow: hidden; }
+.nav button {
+  width: 100%; min-height: 68px; background: none; border: 0; cursor: pointer; padding: 0 2px;
+  display: grid; justify-items: center; align-content: center; gap: 2px;
+  font-size: 1rem; color: var(--textoSuave); border-top: 4px solid transparent;
+}
+.nav button svg { width: 26px; height: 26px; }
+.nav button[aria-current="page"] { color: var(--principal); font-weight: 800; border-top-color: var(--principal); }
+
+/* Aviso rápido */
+.aviso-rapido {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 40;
+  background: var(--texto); color: var(--cartao); padding: 12px 20px; border-radius: 12px;
+  font-weight: 600; max-width: calc(100% - 32px); text-align: center;
+}
+
+/* Janelas */
+dialog {
+  border: 0; border-radius: 18px; padding: 0; width: min(560px, calc(100% - 24px));
+  max-height: calc(100% - 24px); background: var(--cartao); color: var(--texto);
+}
+dialog::backdrop { background: rgba(20, 30, 26, .55); }
+.janela { display: grid; gap: 16px; padding: 22px 20px; }
+.janela-acoes { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+.janela-acoes .btn { flex: 1 1 140px; }
+.menu-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.menu-lista .btn { width: 100%; justify-content: flex-start; }
+.lista-meses { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lista-meses button {
+  width: 100%; min-height: 56px; text-align: left; padding: 10px 14px; border-radius: 12px;
+  border: 2px solid var(--borda); background: var(--cartao); cursor: pointer;
+  display: flex; justify-content: space-between; gap: 12px; align-items: center;
+}
+.lista-meses button[aria-current="true"] { border-color: var(--principal); background: var(--principalClaro); font-weight: 700; }
+
+@media (min-width: 700px) {
+  .topo h1 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="faixa-exemplo" id="faixaExemplo" hidden>
+  <div class="dentro">
+    <p>Você está vendo o exemplo da Brasa no Bairro. Os seus dados não foram mexidos.</p>
+    <button type="button" class="btn pequeno" data-acao="sairExemplo">Sair do exemplo</button>
+  </div>
+</div>
+
+<div class="pagina">
+  <header class="topo">
+    <div class="topo-linha">
+      <div>
+        <p class="ebook" id="txtEbook"></p>
+        <h1 id="txtFerramenta"></h1>
+      </div>
+      <button type="button" class="btn sec pequeno" id="btnMenu" aria-haspopup="dialog">Menu</button>
+    </div>
+    <a class="link-pagina" href="index.html">Controle de retiradas (Capítulo 1)</a>
+  </header>
+
+  <p class="leitura passou" id="avisoArmazenamento" role="alert" hidden>
+    Este navegador não está guardando os dados. Eles vão sumir ao fechar a página. Tente abrir em outro navegador ou fora da janela anônima.
+  </p>
+
+  <main>
+    <!-- ============ SEMANA ============ -->
+    <section class="secao" id="tela-semana" aria-labelledby="h-semana">
+      <h2 id="h-semana" tabindex="-1">Quadro da semana</h2>
+      <p class="suave">Preencha toda segunda-feira.</p>
+
+      <div class="caixa">
+        <div class="campo" id="campo-qData">
+          <label for="qData">Data do quadro</label>
+          <div class="entrada" id="qDataCaixa"><input id="qData" type="date" aria-describedby="qDataErro"></div>
+          <p class="rotulo" id="qDataExemplo" hidden></p>
+          <p class="msg-erro" id="qDataErro" hidden></p>
+        </div>
+        <div class="botoes">
+          <button type="button" class="btn sec" data-acao="novoQuadro">Novo quadro</button>
+          <button type="button" class="btn sec" data-tela="historico">Ver outros quadros</button>
+        </div>
+      </div>
+
+      <div id="semResultado" aria-live="polite"></div>
+      <div id="semComparacao"></div>
+      <div class="caixa" id="semIndicadores" hidden>
+        <h3>Os outros indicadores</h3>
+        <div class="indicadores" id="semLista"></div>
+      </div>
+
+      <form class="caixa" id="formSemana" novalidate>
+        <h3 id="h-valores">Valores da semana</h3>
+        <p class="dica">Se não tiver algum item, digite 0.</p>
+        <div class="pilha" id="camposSemana"></div>
+        <div class="campo" id="campo-q_saidas">
+          <label for="q_saidas">Total de saídas do mês</label>
+          <p class="dica" id="q_saidasDica">Tudo o que a empresa paga no mês, inclusive o pró-labore.</p>
+          <div class="entrada"><span class="prefixo" aria-hidden="true">R$</span>
+            <input id="q_saidas" type="text" inputmode="decimal" autocomplete="off" placeholder="0" aria-describedby="q_saidasDica q_saidasOrigem q_saidasErro">
+          </div>
+          <p class="dica" id="q_saidasOrigem" hidden></p>
+          <div id="q_saidasSugerir" hidden><button type="button" class="btn sec pequeno" data-acao="usarSugestao" id="btnSugestao"></button></div>
+          <p class="msg-erro" id="q_saidasErro" hidden></p>
+        </div>
+        <p class="salvo" id="qSalvo" aria-live="polite"></p>
+        <button type="button" class="btn largo" data-acao="verTopo">Ver o resultado</button>
+      </form>
+
+      <div class="caixa leitura" id="lembreteCopia" hidden>
+        <div class="textos">
+          <p id="lembreteCopiaTxt"></p>
+          <div><button type="button" class="btn sec pequeno" data-ir="dados">Fazer cópia de segurança</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MÊS ============ -->
+    <section class="secao" id="tela-mes" aria-labelledby="h-mes" hidden>
+      <h2 id="h-mes" tabindex="-1">Parte do mês</h2>
+      <p class="suave">Preencha no último dia do mês.</p>
+      <button type="button" class="seletor" data-acao="trocarMes" aria-haspopup="dialog">
+        <strong id="txtMes"></strong><span>Trocar mês</span>
+      </button>
+
+      <div id="mesResultado" aria-live="polite"></div>
+
+      <form class="caixa" id="formMes" novalidate>
+        <h3>Valores do mês</h3>
+        <div class="campo" id="campo-m_custo">
+          <label for="m_custo">Custo da mercadoria do mês</label>
+          <div class="entrada"><span class="prefixo" aria-hidden="true">R$</span>
+            <input id="m_custo" type="text" inputmode="decimal" autocomplete="off" placeholder="0" aria-describedby="m_custoErro"></div>
+          <p class="msg-erro" id="m_custoErro" hidden></p>
+        </div>
+        <div class="campo" id="campo-m_receita">
+          <label for="m_receita">Receita do mês</label>
+          <div class="entrada"><span class="prefixo" aria-hidden="true">R$</span>
+            <input id="m_receita" type="text" inputmode="decimal" autocomplete="off" placeholder="0" aria-describedby="m_receitaErro"></div>
+          <p class="msg-erro" id="m_receitaErro" hidden></p>
+        </div>
+        <div class="campo" id="campo-m_prazo">
+          <label for="m_prazo">Receita do mês que entra a prazo (cartão e plataforma)</label>
+          <p class="dica" id="m_prazoDica">Se vende só à vista, digite 0.</p>
+          <div class="entrada"><span class="prefixo" aria-hidden="true">R$</span>
+            <input id="m_prazo" type="text" inputmode="decimal" autocomplete="off" placeholder="0" aria-describedby="m_prazoDica m_prazoErro"></div>
+          <p class="msg-erro" id="m_prazoErro" hidden></p>
+        </div>
+        <div class="campo" id="campo-m_dias">
+          <label for="m_dias">Em quantos dias o cartão e a plataforma pagam</label>
+          <div class="entrada"><input id="m_dias" type="text" inputmode="decimal" autocomplete="off" placeholder="0" aria-describedby="m_diasErro"><span class="sufixo" aria-hidden="true">dias</span></div>
+          <p class="msg-erro" id="m_diasErro" hidden></p>
+        </div>
+        <div class="campo" id="campo-m_estoque">
+          <label for="m_estoque">Estoque</label>
+          <p class="dica" id="m_estoqueDica">Mercadoria pelo valor de compra. Se não tem estoque, digite 0.</p>
+          <div class="entrada"><span class="prefixo" aria-hidden="true">R$</span>
+            <input id="m_estoque" type="text" inputmode="decimal" autocomplete="off" placeholder="0" aria-describedby="m_estoqueDica m_origem m_estoqueErro"></div>
+          <p class="msg-erro" id="m_estoqueErro" hidden></p>
+        </div>
+        <div class="campo" id="campo-m_fornecedores">
+          <label for="m_fornecedores">Fornecedores</label>
+          <p class="dica" id="m_fornecedoresDica">Boletos de mercadoria do mês.</p>
+          <div class="entrada"><span class="prefixo" aria-hidden="true">R$</span>
+            <input id="m_fornecedores" type="text" inputmode="decimal" autocomplete="off" placeholder="0" aria-describedby="m_fornecedoresDica m_origem m_fornecedoresErro"></div>
+          <p class="msg-erro" id="m_fornecedoresErro" hidden></p>
+        </div>
+        <p class="dica" id="m_origem" hidden></p>
+        <div id="m_trazer" hidden><button type="button" class="btn sec pequeno" data-acao="trazerQuadro" id="btnTrazer"></button></div>
+        <p class="salvo" id="mSalvo" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- ============ TESTE ============ -->
+    <section class="secao" id="tela-teste" aria-labelledby="h-teste" hidden>
+      <h2 id="h-teste" tabindex="-1">Teste do livro</h2>
+      <div id="testeResultado" aria-live="polite"></div>
+      <div class="caixa">
+        <h3 id="h-perguntas">Fazer o teste</h3>
+        <p><strong>Responda pelo que acontece hoje, sem consultar extrato, caderno ou sistema. Na dúvida, marque não.</strong></p>
+        <div id="perguntas"></div>
+        <p class="dica" id="testeFaltam" aria-live="polite"></p>
+        <button type="button" class="btn largo" data-acao="guardarTeste" id="btnGuardarTeste">Guardar o resultado</button>
+      </div>
+    </section>
+
+    <!-- ============ PLANO ============ -->
+    <section class="secao" id="tela-plano" aria-labelledby="h-plano" hidden>
+      <h2 id="h-plano" tabindex="-1">Plano de ação de 30 dias</h2>
+      <p class="leitura atencao" id="avisoRefazer" role="status" hidden><span class="icone" aria-hidden="true">!</span><span>Refaça o teste do livro e monte o plano dos próximos 30 dias.</span></p>
+      <div class="caixa">
+        <div class="campo" id="campo-pInicio">
+          <label for="pInicio">Começo do plano</label>
+          <p class="dica" id="pInicioDica">A semana 1 começa nesta data. Cada semana usa o quadro feito nela.</p>
+          <div class="entrada" id="pInicioCaixa"><input id="pInicio" type="date" aria-describedby="pInicioDica"></div>
+          <p class="rotulo" id="pInicioExemplo" hidden></p>
+        </div>
+      </div>
+      <div id="semanasPlano" class="pilha"></div>
+      <button type="button" class="btn sec largo" data-acao="novoPlano">Começar um plano novo</button>
+      <details class="anteriores caixa" id="planosAnteriores" hidden>
+        <summary>Planos anteriores</summary>
+        <div id="listaPlanos" class="pilha"></div>
+      </details>
+    </section>
+
+    <!-- ============ HISTÓRICO ============ -->
+    <section class="secao" id="tela-historico" aria-labelledby="h-historico" hidden>
+      <h2 id="h-historico" tabindex="-1">Histórico</h2>
+      <div class="caixa">
+        <h3>Quadros semanais</h3>
+        <ul class="lista" id="histSemanas"></ul>
+        <button type="button" class="btn sec largo" data-acao="novoQuadro">Novo quadro</button>
+      </div>
+      <div class="caixa">
+        <h3>Parte do mês</h3>
+        <ul class="lista" id="histMeses"></ul>
+      </div>
+      <div class="caixa">
+        <h3>Testes do livro</h3>
+        <ul class="lista" id="histTestes"></ul>
+      </div>
+    </section>
+
+    <!-- ============ MEUS DADOS ============ -->
+    <section class="secao" id="tela-dados" aria-labelledby="h-dados" hidden>
+      <h2 id="h-dados" tabindex="-1">Meus dados</h2>
+      <div class="caixa">
+        <p><strong>Os seus dados ficam guardados só neste aparelho, neste navegador.</strong> Nada é enviado para a internet. Se o navegador for limpo, eles somem.</p>
+        <p class="suave" id="dadosIphone" hidden>No iPhone, adicione o site à tela de início (Compartilhar, depois Adicionar à Tela de Início) para os dados não serem apagados quando o site fica muitos dias sem uso.</p>
+        <p class="suave">Os dados desta página ficam separados dos dados do Controle de retiradas. A cópia de segurança de cada página é feita na própria página.</p>
+      </div>
+      <p class="leitura" id="dadosExemploAviso" hidden>Você está no exemplo. Saia do exemplo para baixar, copiar ou apagar os seus dados.</p>
+
+      <div class="caixa">
+        <h3>Guardar e levar</h3>
+        <button type="button" class="btn sec largo" data-acao="planilha" data-real>Baixar meus dados em planilha</button>
+        <p class="dica">Abre no Excel ou no Google Planilhas.</p>
+      </div>
+
+      <div class="caixa">
+        <h3>Fazer cópia de segurança / Restaurar cópia</h3>
+        <p class="dica">A cópia é um arquivo com todos os quadros, meses, testes e planos desta página. Para usar em outro aparelho, abra esta página lá e toque em "Restaurar cópia".</p>
+        <button type="button" class="btn largo" data-acao="copia" data-real>Fazer cópia de segurança</button>
+        <button type="button" class="btn sec largo" data-acao="restaurar" data-real>Restaurar cópia</button>
+        <input type="file" id="arquivoCopia" accept=".json,application/json" hidden>
+        <p class="dica" id="txtUltimaCopia"></p>
+      </div>
+
+      <div class="caixa">
+        <h3>Apagar</h3>
+        <button type="button" class="btn perigo largo" data-acao="apagarQuadro" data-real id="btnApagarQuadro">Apagar este quadro</button>
+        <button type="button" class="btn perigo largo" data-acao="apagarTudo" data-real>Apagar todos os dados desta página</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <p id="txtAvisoEducativo"></p>
+    <p>Os seus dados ficam só neste aparelho e somem se o navegador for limpo.</p>
+  </footer>
+</div>
+
+<nav class="nav" aria-label="Telas">
+  <ul>
+    <li><button type="button" data-tela="semana">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      <span class="rot" data-t="Semana">Semana</span></button></li>
+    <li><button type="button" data-tela="mes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      <span class="rot" data-t="Mês">Mês</span></button></li>
+    <li><button type="button" data-tela="teste">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12l3 3 5-6"/></svg>
+      <span class="rot" data-t="Teste">Teste</span></button></li>
+    <li><button type="button" data-tela="plano">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>
+      <span class="rot" data-t="Plano">Plano</span></button></li>
+    <li><button type="button" data-tela="historico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <span class="rot" data-t="Histórico">Histórico</span></button></li>
+  </ul>
+</nav>
+
+<div class="aviso-rapido" id="avisoRapido" role="status" aria-live="polite" hidden></div>
+
+<!-- Janela: menu -->
+<dialog id="dlgMenu" aria-labelledby="dlgMenuTit">
+  <div class="janela">
+    <h2 id="dlgMenuTit">Menu</h2>
+    <ul class="menu-lista">
+      <li><button type="button" class="btn sec" data-acao="exemplo" id="menuExemplo">Ver o exemplo da Brasa no Bairro</button></li>
+      <li><button type="button" class="btn sec" data-ir="dados">Meus dados (cópia, planilha, apagar)</button></li>
+      <li><a class="btn sec" href="index.html" style="width:100%;justify-content:flex-start;text-decoration:none">Controle de retiradas (Capítulo 1)</a></li>
+    </ul>
+    <div class="janela-acoes"><button type="button" class="btn" data-fechar>Fechar</button></div>
+  </div>
+</dialog>
+
+<!-- Janela: trocar mês -->
+<dialog id="dlgMeses" aria-labelledby="dlgMesesTit">
+  <form class="janela" id="formMeses" novalidate>
+    <h2 id="dlgMesesTit">Escolha o mês</h2>
+    <ul class="lista-meses" id="listaMeses"></ul>
+    <div class="pilha" id="outroMes">
+      <p class="rotulo">Outro mês</p>
+      <div class="duas">
+        <div class="campo"><label for="nMes">Mês</label><select id="nMes"></select></div>
+        <div class="campo"><label for="nAno">Ano</label><select id="nAno"></select></div>
+      </div>
+    </div>
+    <div class="janela-acoes">
+      <button type="button" class="btn sec" data-fechar>Fechar</button>
+      <button type="submit" class="btn" id="nAbrir">Abrir</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Janela: confirmar -->
+<dialog id="dlgConfirma" aria-labelledby="dlgConfirmaTit" aria-describedby="dlgConfirmaTxt">
+  <div class="janela">
+    <h2 id="dlgConfirmaTit"></h2>
+    <p id="dlgConfirmaTxt"></p>
+    <div class="janela-acoes">
+      <button type="button" class="btn sec" id="dlgConfirmaNao">Cancelar</button>
+      <button type="button" class="btn perigo-cheio" id="dlgConfirmaSim"></button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Constantes ---------- */
+  // Nome da "gaveta" onde os dados desta página ficam guardados. É diferente da do Controle de retiradas.
+  // Não mude: quem já usa a página perderia o acesso aos dados.
+  var CHAVE = "quadroIndicadores.v1";
+  // Gaveta do Controle de retiradas: só é lida, para sugerir o total de saídas do mês. Nunca é alterada aqui.
+  var CHAVE_CONTROLE = "controleRetiradasDono.v1";
+  var NOMES_MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+  var DIAS_SEM_COPIA = 30;
+
+  var LINHAS = [
+    { id: "caixa", nome: "Caixa", dica: "Saldo em conta e dinheiro da gaveta.", ex: "caixa" },
+    { id: "receber", nome: "Contas a receber", dica: "Cartão e plataforma a receber.", ex: "contasAReceber" },
+    { id: "estoque", nome: "Estoque", dica: "Mercadoria pelo valor de compra.", ex: "estoque" },
+    { id: "fornecedores", nome: "Fornecedores", dica: "Boletos de mercadoria do mês.", ex: "fornecedores" },
+    { id: "salarios", nome: "Salários e encargos", dica: "Folha a pagar no mês.", ex: "salariosEEncargos" },
+    { id: "impostos", nome: "Impostos", dica: "Guias a pagar no mês.", ex: "impostos" },
+    { id: "parcelas", nome: "Parcelas de empréstimo", dica: "Parcelas que vencem no mês.", ex: "parcelasDeEmprestimo" }
+  ];
+  // Linhas comparadas quando o saldo disponível cai (contas a receber, estoque e contas a pagar das linhas 4 a 6).
+  var LINHAS_COMPARADAS = ["receber", "estoque", "fornecedores", "salarios", "impostos"];
+
+  var EXPLICA = {
+    ccl: "A folga financeira: caixa, contas a receber e estoque, menos o que a empresa deve no curto prazo.",
+    ncg: "O dinheiro preso na operação.",
+    saldo: "O que sobra livre depois de financiar o giro.",
+    folegoLivre: "Quantos dias o saldo livre sustenta a operação funcionando.",
+    folegoCaixa: "Vale só se as vendas pararem; para decidir a semana, use o fôlego livre.",
+    ciclo: "O tempo entre pagar o fornecedor e receber o dinheiro da venda."
+  };
+
+  var FAIXAS = {
+    1: { tom: "passou", criterio: "Saldo disponível abaixo de R$ 0.",
+         decisao: "Não aumente vendas a prazo nem estoque, negocie prazo com o fornecedor e reveja o caixa com os Capítulos 3 e 4." },
+    2: { tom: "atencao", criterio: "Saldo disponível de R$ 0 até abaixo de 7 dias de desembolso.",
+         decisao: "Acompanhe o saldo toda semana e escolha 1 ação por semana para reduzir o ciclo financeiro." },
+    3: { tom: "coube", criterio: "Saldo disponível igual ou acima de 7 dias de desembolso.",
+         decisao: "Mantenha a rotina semanal e confira o ciclo financeiro no fim do mês." }
+  };
+  var FRASE_LIMITES = "Os limites das faixas são critério dos autores do e-book.";
+
+  var PERGUNTAS = [
+    "Você retira da empresa um pró-labore fixo e paga as contas da casa só com ele?",
+    "Você sabe quanto sobrou no mês passado sem consultar documento?",
+    "Você sabe em quantos dias recebe dos clientes e em quantos dias paga os fornecedores?",
+    "Você sabe quantos dias a empresa aguenta se o faturamento parar hoje?",
+    "Você sabe quanto precisa vender no mês para não perder dinheiro?",
+    "Antes de investir, você calcula em quanto tempo o investimento se paga e com que caixa?",
+    "Antes de contratar crédito, você confere se a parcela cabe no caixa do mês?",
+    "Você sabe quanto do seu preço é imposto?",
+    "Você confere o estoque no fim de cada mês?",
+    "Alguém além de você sabe decidir e pagar as contas se você se afastar por 30 dias?"
+  ]; // a pergunta N é do Capítulo N
+
+  function resultadoTeste(sims) {
+    if (sims <= 3) return { tom: "passou", frase: "O livro ainda não virou rotina na empresa.", fazer: "Comece pelos Capítulos 1 a 4, na ordem, e use o quadro." };
+    if (sims <= 7) return { tom: "atencao", frase: "Parte das práticas existe, com lacunas.", fazer: "Use os não para montar o plano de ação de 30 dias." };
+    return { tom: "coube", frase: "A base existe e funciona.", fazer: "Mantenha a rotina semanal e refaça o teste depois de 4 semanas." };
+  }
+
+  var SUGESTOES = ["Pedir ao fornecedor um prazo maior de pagamento", "Reduzir o prazo de recebimento das vendas", "Reduzir o estoque parado"];
+
+  var INDICADORES_PLANO = [
+    { id: "saldo", nome: "Saldo disponível" },
+    { id: "ccl", nome: "Capital circulante líquido" },
+    { id: "ncg", nome: "Necessidade de capital de giro" },
+    { id: "folegoLivre", nome: "Fôlego de caixa livre" },
+    { id: "folegoCaixa", nome: "Fôlego de caixa" }
+  ];
+
+  /* ---------- Estado ---------- */
+  var dados = null;      // dados reais da pessoa
+  var exemplo = null;    // dados do exemplo (só na memória)
+  var mesVirtual = null; // parte do mês aberta que ainda não foi guardada
+  var armazenamentoOk = true;
+  var telaAtual = "semana";
+
+  function atual() { return exemplo || dados; }
+
+  function dadosVazios() {
+    return { versao: 1, semanas: [], semanaAberta: null, meses: {}, mesAberto: null, testes: [],
+             rascunhoTeste: [null, null, null, null, null, null, null, null, null, null],
+             plano: null, planosAnteriores: [], ultimaCopia: null };
+  }
+  function quadroVazio(data) {
+    var q = { id: novoId(), data: data, saidas: null };
+    LINHAS.forEach(function (l) { q[l.id] = null; });
+    return q;
+  }
+  function mesVazio() { return { custo: null, receita: null, receitaPrazo: null, dias: null, estoque: null, fornecedores: null }; }
+  function linhaPlanoVazia() { return { numero: "saldo", acao: "", capitulo: null, feito: false }; }
+  function planoVazio(inicio) { return { inicio: inicio, linhas: [linhaPlanoVazia(), linhaPlanoVazia(), linhaPlanoVazia(), linhaPlanoVazia()] }; }
+  function novoId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  /* ---------- Números ---------- */
+  // Lê o que a pessoa digitou. Devolve centavos, null (vazio) ou NaN (não entendi).
+  function lerValor(txt) {
+    if (txt == null) return null;
+    var s = String(txt).replace(/r\$/i, "").replace(/\s/g, "");
+    if (s === "") return null;
+    var inteiro, dec = "";
+    if (s.indexOf(",") >= 0) {
+      var p = s.split(",");
+      if (p.length !== 2 || !/^\d{0,2}$/.test(p[1])) return NaN;
+      inteiro = p[0] === "" ? "0" : p[0];
+      dec = p[1];
+      if (/^\d{1,3}(\.\d{3})+$/.test(inteiro)) inteiro = inteiro.replace(/\./g, "");
+      else if (!/^\d+$/.test(inteiro)) return NaN;
+    } else if (/^\d+$/.test(s)) {
+      inteiro = s;
+    } else if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+      inteiro = s.replace(/\./g, "");
+    } else if (/^\d+\.\d{1,2}$/.test(s)) {
+      var q = s.split(".");
+      inteiro = q[0]; dec = q[1];
+    } else {
+      return NaN;
+    }
+    if (inteiro.length > 11) return NaN;
+    dec = (dec + "00").slice(0, 2);
+    return parseInt(inteiro, 10) * 100 + parseInt(dec, 10);
+  }
+  // Dias: aceita "30" ou "30,5". Devolve número, null ou NaN.
+  function lerDias(txt) {
+    var s = String(txt == null ? "" : txt).replace(/dias?/i, "").replace(/\s/g, "").replace(",", ".");
+    if (s === "") return null;
+    if (!/^\d{1,3}(\.\d)?$/.test(s)) return NaN;
+    return parseFloat(s);
+  }
+  function lerValorOuNulo(t) { var v = lerValor(t); return (v === null || isNaN(v)) ? null : v; }
+
+  function milhar(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+  // Valor digitado, mostrado de volta no campo: "6.800" ou "6.800,50".
+  function valorCampo(c) {
+    if (c === null) return "";
+    var reais = Math.floor(c / 100), cent = c % 100;
+    return milhar(reais) + (cent ? "," + (cent < 10 ? "0" : "") + cent : "");
+  }
+  // Resultado em reais, sem centavos: "R$ 21.775".
+  function rs(c) {
+    var reais = Math.round(Math.abs(c) / 100);
+    return (c < 0 && reais > 0 ? "−" : "") + "R$ " + milhar(reais);
+  }
+  // Décimos (ex.: 33) viram "3,3".
+  function decimal(decimos) {
+    var neg = decimos < 0, a = Math.abs(decimos);
+    return (neg ? "−" : "") + milhar(Math.floor(a / 10)) + "," + (a % 10);
+  }
+  function dias(decimos) { return decimal(decimos) + " dias"; }
+  function pct(decimos) { return decimal(decimos) + "%"; }
+
+  /* ---------- Datas ---------- */
+  function doisDig(n) { return (n < 10 ? "0" : "") + n; }
+  function hojeReal() { var d = new Date(); return d.getFullYear() + "-" + doisDig(d.getMonth() + 1) + "-" + doisDig(d.getDate()); }
+  // No exemplo, "hoje" é o dia do quadro da Brasa.
+  function hoje() { return exemplo ? exemplo.hojeFixo : hojeReal(); }
+  function somarDias(iso, n) {
+    var p = iso.split("-"), d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + n));
+    return d.toISOString().slice(0, 10);
+  }
+  function diasEntre(a, b) {
+    var pa = a.split("-"), pb = b.split("-");
+    return Math.round((Date.UTC(+pb[0], +pb[1] - 1, +pb[2]) - Date.UTC(+pa[0], +pa[1] - 1, +pa[2])) / 86400000);
+  }
+  function chaveMes(iso) { return iso.slice(0, 7); }
+  function mesSeguinte(chave) {
+    var p = chave.split("-"), a = +p[0], m = +p[1] + 1;
+    if (m > 12) { m = 1; a++; }
+    return a + "-" + doisDig(m);
+  }
+  // O exemplo usa datas do ano 2000 só por dentro: mês 4 do negócio = abril de 2000.
+  function numeroMesExemplo(chave) { var p = chave.split("-"); return (+p[0] - 2000) * 12 + (+p[1]); }
+  function dataBR(iso) { var p = iso.split("-"); return p[2] + "/" + p[1] + "/" + p[0]; }
+  function rotuloData(iso) {
+    if (exemplo) return "Dia " + (+iso.split("-")[2]) + " do mês " + numeroMesExemplo(chaveMes(iso));
+    return dataBR(iso);
+  }
+  function rotuloDataCurta(iso) {
+    if (exemplo) return "dia " + (+iso.split("-")[2]);
+    var p = iso.split("-"); return p[2] + "/" + p[1];
+  }
+  // "quadro de 09/11/2026" ou, no exemplo, "quadro do dia 1 do mês 4".
+  function rotuloQuadro(iso) { return exemplo ? "quadro do " + rotuloData(iso).toLowerCase() : "quadro de " + rotuloData(iso); }
+  function nomeMes(chave, maiuscula) {
+    if (exemplo) return (maiuscula ? "Mês " : "mês ") + numeroMesExemplo(chave);
+    var p = chave.split("-"), n = NOMES_MESES[+p[1] - 1] + " de " + p[0];
+    return maiuscula ? n.charAt(0).toUpperCase() + n.slice(1) : n;
+  }
+
+  /* ---------- Guardar ---------- */
+  function carregar() {
+    var bruto = null;
+    try { bruto = localStorage.getItem(CHAVE); armazenamentoOk = true; } catch (e) { armazenamentoOk = false; }
+    dados = dadosVazios();
+    if (bruto) {
+      try { var lido = limpar(JSON.parse(bruto)); if (lido) dados = lido; } catch (e) { /* guarda inválida: começa vazio */ }
+    }
+    garantir(dados);
+  }
+  function salvar() {
+    if (exemplo) return;
+    try { localStorage.setItem(CHAVE, JSON.stringify(dados)); armazenamentoOk = true; }
+    catch (e) { armazenamentoOk = false; }
+    $("avisoArmazenamento").hidden = armazenamentoOk;
+  }
+  // Garante que há um quadro aberto, um mês aberto e um plano.
+  function garantir(d) {
+    if (!quadroPorId(d, d.semanaAberta)) {
+      var ord = semanasOrdenadas(d);
+      if (ord.length) d.semanaAberta = ord[ord.length - 1].id;
+      else { var q = quadroVazio(hoje()); aplicarSugestao(q); d.semanas.push(q); d.semanaAberta = q.id; }
+    }
+    if (!d.mesAberto) d.mesAberto = chaveMes(hoje());
+    if (!d.plano) {
+      var ult = semanasOrdenadas(d).slice(-1)[0];
+      d.plano = planoVazio(ult ? ult.data : hoje());
+    }
+  }
+
+  // Confere e limpa dados vindos da memória ou de uma cópia de segurança.
+  function limpar(obj) {
+    if (!obj || typeof obj !== "object" || !Array.isArray(obj.semanas)) return null;
+    var d = dadosVazios();
+    function num(v) { return (typeof v === "number" && isFinite(v) && v >= 0) ? Math.round(v) : null; }
+    function iso(v) { return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v); }
+    var vistas = {};
+    obj.semanas.forEach(function (q) {
+      if (!q || !iso(q.data) || vistas[q.data]) return;
+      vistas[q.data] = true;
+      var n = { id: String(q.id || novoId()), data: q.data, saidas: num(q.saidas) };
+      LINHAS.forEach(function (l) { n[l.id] = num(q[l.id]); });
+      if (q.saidasDe && typeof q.saidasDe === "object" && /^\d{4}-\d{2}$/.test(q.saidasDe.mes)) {
+        n.saidasDe = { mes: q.saidasDe.mes, gastos: num(q.saidasDe.gastos), proLabore: num(q.saidasDe.proLabore) };
+      }
+      d.semanas.push(n);
+    });
+    if (obj.meses && typeof obj.meses === "object") {
+      Object.keys(obj.meses).forEach(function (k) {
+        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(k)) return;
+        var m = obj.meses[k] || {};
+        d.meses[k] = { custo: num(m.custo), receita: num(m.receita), receitaPrazo: num(m.receitaPrazo),
+                       dias: (typeof m.dias === "number" && m.dias >= 0 && m.dias <= 999) ? m.dias : null,
+                       estoque: num(m.estoque), fornecedores: num(m.fornecedores) };
+        if (iso(m.origemQuadro)) d.meses[k].origemQuadro = m.origemQuadro;
+      });
+    }
+    function respostas(r) {
+      return Array.isArray(r) && r.length === 10 ? r.map(function (x) { return x === true ? true : x === false ? false : null; }) : null;
+    }
+    if (Array.isArray(obj.testes)) {
+      obj.testes.forEach(function (t) {
+        var r = t && respostas(t.respostas);
+        if (t && iso(t.data) && r && r.every(function (x) { return x !== null; })) d.testes.push({ data: t.data, respostas: r });
+      });
+      d.testes.sort(function (a, b) { return a.data < b.data ? -1 : a.data > b.data ? 1 : 0; });
+    }
+    d.rascunhoTeste = respostas(obj.rascunhoTeste) || d.rascunhoTeste;
+    function plano(p) {
+      if (!p || !iso(p.inicio) || !Array.isArray(p.linhas)) return null;
+      var linhas = [0, 1, 2, 3].map(function (i) {
+        var l = p.linhas[i] || {};
+        var numero = INDICADORES_PLANO.some(function (x) { return x.id === l.numero; }) ? l.numero : "saldo";
+        var cap = +l.capitulo;
+        return { numero: numero, acao: typeof l.acao === "string" ? l.acao.slice(0, 160) : "",
+                 capitulo: cap >= 1 && cap <= 10 ? cap : null, feito: !!l.feito };
+      });
+      var r = { inicio: p.inicio, linhas: linhas };
+      if (iso(p.guardadoEm)) r.guardadoEm = p.guardadoEm;
+      return r;
+    }
+    d.plano = plano(obj.plano);
+    if (Array.isArray(obj.planosAnteriores)) obj.planosAnteriores.forEach(function (p) { var x = plano(p); if (x) d.planosAnteriores.push(x); });
+    d.semanaAberta = typeof obj.semanaAberta === "string" ? obj.semanaAberta : null;
+    d.mesAberto = typeof obj.mesAberto === "string" && /^\d{4}-\d{2}$/.test(obj.mesAberto) ? obj.mesAberto : null;
+    d.ultimaCopia = typeof obj.ultimaCopia === "string" ? obj.ultimaCopia : null;
+    return d;
+  }
+
+  /* ---------- Exemplo ---------- */
+  function montarExemplo() {
+    var d = dadosVazios(), Q = EXEMPLO.quadro, M = EXEMPLO.parteDoMes;
+    function chaveDoMes(n) { return (2000 + Math.floor((n - 1) / 12)) + "-" + doisDig(((n - 1) % 12) + 1); }
+    var dataQuadro = chaveDoMes(Q.mes) + "-" + doisDig(Q.dia);
+    var q = { id: novoId(), data: dataQuadro, saidas: lerValorOuNulo(Q.totalDeSaidasDoMes) };
+    LINHAS.forEach(function (l) { q[l.id] = lerValorOuNulo(Q[l.ex]); });
+    d.semanas.push(q); d.semanaAberta = q.id;
+    var chave = chaveDoMes(M.mes);
+    d.meses[chave] = { custo: lerValorOuNulo(M.custoDaMercadoria), receita: lerValorOuNulo(M.receitaDoMes),
+                       receitaPrazo: lerValorOuNulo(M.receitaAPrazo), dias: lerDias(M.diasParaReceber),
+                       estoque: null, fornecedores: null };
+    if (isNaN(d.meses[chave].dias)) d.meses[chave].dias = null;
+    d.mesAberto = chave;
+    d.plano = planoVazio(dataQuadro);
+    (EXEMPLO.plano || []).slice(0, 4).forEach(function (linha, i) {
+      var ind = INDICADORES_PLANO.filter(function (x) { return x.nome.toLowerCase() === String(linha[0]).toLowerCase(); })[0];
+      d.plano.linhas[i] = { numero: ind ? ind.id : "saldo", acao: String(linha[1] || ""), capitulo: +linha[2] >= 1 && +linha[2] <= 10 ? +linha[2] : null, feito: false };
+    });
+    d.hojeFixo = dataQuadro;
+    return d;
+  }
+
+  /* ---------- Quadros ---------- */
+  function quadroPorId(d, id) { return d.semanas.filter(function (q) { return q.id === id; })[0] || null; }
+  function semanasOrdenadas(d) { return d.semanas.slice().sort(function (a, b) { return a.data < b.data ? -1 : a.data > b.data ? 1 : 0; }); }
+  function quadroAberto() { return quadroPorId(atual(), atual().semanaAberta); }
+  function quadroAnterior(q) {
+    var ord = semanasOrdenadas(atual()), ant = null;
+    ord.forEach(function (x) { if (x.data < q.data) ant = x; });
+    return ant;
+  }
+
+  // Sugestão do total de saídas, lida do Controle de retiradas deste aparelho:
+  // gastos da empresa sem o pró-labore + pró-labore combinado do último mês com os dois preenchidos.
+  function sugestaoSaidas() {
+    if (exemplo) return null;
+    var c = null;
+    try { c = JSON.parse(localStorage.getItem(CHAVE_CONTROLE)); } catch (e) { return null; }
+    if (!c || !c.meses || typeof c.meses !== "object") return null;
+    var ks = Object.keys(c.meses).filter(function (k) { return /^\d{4}-\d{2}$/.test(k); }).sort().reverse();
+    for (var i = 0; i < ks.length; i++) {
+      var m = c.meses[ks[i]] || {};
+      var g = m.gastos !== undefined ? m.gastos : m.gastou;
+      var p = m.proLabore !== undefined ? m.proLabore : m.fixa;
+      if (typeof g === "number" && typeof p === "number" && g >= 0 && p >= 0) return { mes: ks[i], gastos: g, proLabore: p, total: g + p };
+    }
+    return null;
+  }
+  function aplicarSugestao(q) {
+    var s = sugestaoSaidas();
+    if (s && q.saidas === null) { q.saidas = s.total; q.saidasDe = { mes: s.mes, gastos: s.gastos, proLabore: s.proLabore }; }
+  }
+
+  // Indicadores da semana. Valores em centavos; dias e percentuais em décimos.
+  function calcSemana(q) {
+    var faltam = LINHAS.filter(function (l) { return q[l.id] === null; }).length;
+    var r = { completo: faltam === 0, faltam: faltam };
+    if (!r.completo) return r;
+    r.ccl = q.caixa + q.receber + q.estoque - (q.fornecedores + q.salarios + q.impostos + q.parcelas);
+    r.ncg = q.receber + q.estoque - (q.fornecedores + q.salarios + q.impostos);
+    r.saldo = r.ccl - r.ncg;
+    r.consome = r.ccl > 0 ? Math.round(r.ncg * 1000 / r.ccl) : null;
+    r.temSaidas = q.saidas !== null;
+    if (r.temSaidas) {
+      var reaisDia = Math.round(q.saidas / 3000); // total de saídas ÷ 30, em reais inteiros
+      if (reaisDia >= 1) {
+        r.desembolso = reaisDia * 100;
+        r.folegoLivre = Math.round(r.saldo * 10 / r.desembolso);
+        r.folegoCaixa = Math.round(q.caixa * 10 / r.desembolso);
+        r.meta = 7 * r.desembolso;
+        r.faixa = r.saldo < 0 ? 1 : r.saldo < r.meta ? 2 : 3;
+        r.falta = r.meta - r.saldo;
+      }
+    }
+    return r;
+  }
+  function valorIndicador(c, id) {
+    if (!c.completo) return null;
+    if (id === "saldo" || id === "ccl" || id === "ncg") return rs(c[id]);
+    if (c.desembolso === undefined) return null;
+    return dias(c[id]);
+  }
+
+  /* ---------- Parte do mês ---------- */
+  // Quadro que dá o estoque e os fornecedores do mês: o último quadro com data dentro do mês;
+  // se o mês não tiver quadro, o primeiro quadro dos 7 primeiros dias do mês seguinte.
+  function quadroDoMes(chave) {
+    var ord = semanasOrdenadas(atual());
+    var dentro = ord.filter(function (q) { return chaveMes(q.data) === chave; });
+    if (dentro.length) return dentro[dentro.length - 1];
+    var seg = mesSeguinte(chave);
+    return ord.filter(function (q) { return chaveMes(q.data) === seg && +q.data.slice(8) <= 7; })[0] || null;
+  }
+  function mesAberto() {
+    var d = atual(), chave = d.mesAberto;
+    var m = d.meses[chave];
+    if (!m) {
+      if (!mesVirtual || mesVirtual.chave !== chave) mesVirtual = { chave: chave, m: mesVazio() };
+      m = mesVirtual.m;
+    }
+    if (m.estoque === null && m.fornecedores === null && !m.origemQuadro) {
+      var q = quadroDoMes(chave);
+      if (q && (q.estoque !== null || q.fornecedores !== null)) { m.estoque = q.estoque; m.fornecedores = q.fornecedores; m.origemQuadro = q.data; }
+    }
+    return m;
+  }
+  function guardarMes(m) {
+    var d = atual();
+    if (!d.meses[d.mesAberto]) { d.meses[d.mesAberto] = m; mesVirtual = null; }
+    salvar();
+  }
+
+  // Prazos em décimos de dia. O ciclo financeiro soma os prazos já arredondados, como aparecem na tela.
+  function calcMes(m) {
+    var r = { avisos: [] };
+    if (m.custo === null) { r.pedir = "Preencha o custo da mercadoria do mês para calcular os prazos."; return r; }
+    if (m.custo <= 0) { r.pedir = "O custo da mercadoria do mês precisa ser maior que zero para calcular os prazos."; return r; }
+    r.estoque = m.estoque === null ? null : Math.round(m.estoque * 300 / m.custo);
+    if (m.estoque === null) r.avisos.push("Preencha o estoque (se não tem estoque, digite 0).");
+    r.pagamento = m.fornecedores === null ? null : Math.round(m.fornecedores * 300 / m.custo);
+    if (m.fornecedores === null) r.avisos.push("Preencha os fornecedores (se não tem, digite 0).");
+    if (m.receitaPrazo === 0) r.recebimento = 0;
+    else if (m.receitaPrazo === null) { r.recebimento = null; r.avisos.push("Preencha a receita do mês que entra a prazo (se vende só à vista, digite 0)."); }
+    else if (m.receita === null || m.receita <= 0) { r.recebimento = null; r.avisos.push("Preencha a receita do mês para calcular o prazo de recebimento."); }
+    else if (m.receitaPrazo > m.receita) { r.recebimento = null; r.avisos.push("A receita a prazo não pode ser maior que a receita do mês."); }
+    else if (m.dias === null) { r.recebimento = null; r.avisos.push("Preencha em quantos dias o cartão e a plataforma pagam."); }
+    else r.recebimento = Math.round(m.dias * 10 * m.receitaPrazo / m.receita);
+    r.ciclo = (r.estoque !== null && r.recebimento !== null && r.pagamento !== null) ? r.estoque + r.recebimento - r.pagamento : null;
+    return r;
+  }
+
+  /* ---------- Ajudantes de tela ---------- */
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (ch) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]; }); }
+
+  var timerAviso = null;
+  function avisar(txt) {
+    var a = $("avisoRapido");
+    a.textContent = txt; a.hidden = false;
+    clearTimeout(timerAviso);
+    timerAviso = setTimeout(function () { a.hidden = true; }, 2600);
+  }
+  function erroCampo(id, msg) {
+    var campo = $("campo-" + id), p = $(id + "Erro"), input = $(id);
+    if (!campo || !p) return;
+    if (msg) { campo.classList.add("erro"); p.textContent = msg; p.hidden = false; input.setAttribute("aria-invalid", "true"); }
+    else { campo.classList.remove("erro"); p.textContent = ""; p.hidden = true; input.removeAttribute("aria-invalid"); }
+  }
+  function abrir(dlg) { if (!dlg.open) dlg.showModal(); }
+  function fechar(dlg) { if (dlg.open) dlg.close(); }
+
+  // tipo: "perigo" (apagar), "normal" ou "aviso" (só um botão).
+  function confirmar(titulo, texto, botaoSim, tipo) {
+    tipo = tipo || "perigo";
+    return new Promise(function (resolve) {
+      var dlg = $("dlgConfirma");
+      $("dlgConfirmaTit").textContent = titulo;
+      $("dlgConfirmaTxt").textContent = texto;
+      $("dlgConfirmaSim").textContent = botaoSim;
+      $("dlgConfirmaSim").className = tipo === "perigo" ? "btn perigo-cheio" : "btn";
+      $("dlgConfirmaNao").hidden = tipo === "aviso";
+      function fim(v) {
+        $("dlgConfirmaSim").onclick = null; $("dlgConfirmaNao").onclick = null; dlg.onclose = null;
+        fechar(dlg); resolve(v);
+      }
+      $("dlgConfirmaSim").onclick = function () { fim(true); };
+      $("dlgConfirmaNao").onclick = function () { fim(false); };
+      dlg.onclose = function () { fim(false); };
+      abrir(dlg);
+      (tipo === "aviso" ? $("dlgConfirmaSim") : $("dlgConfirmaNao")).focus();
+    });
+  }
+
+  function ind(nome, valor, explicacao, classe) {
+    return '<div class="ind ' + (classe || "") + '"><div class="ind-topo"><span class="ind-nome">' + nome + '</span>' + valor + '</div>' +
+      (explicacao ? '<span class="ind-exp">' + explicacao + '</span>' : "") + '</div>';
+  }
+  function val(txt) { return '<span class="ind-val">' + txt + '</span>'; }
+  function blocoLeitura(tom, selo, paragrafos, extra) {
+    var icone = tom === "coube" ? "✓" : (tom === "passou" || tom === "atencao") ? "!" : "i";
+    return '<div class="leitura ' + tom + '"><span class="icone" aria-hidden="true">' + icone + '</span><div class="textos">' +
+      (selo ? '<span class="selo">' + selo + '</span>' : "") +
+      paragrafos.map(function (t) { return "<p>" + t + "</p>"; }).join("") + (extra || "") + '</div></div>';
+  }
+
+  /* ---------- Desenho das telas ---------- */
+  function mostrarTela(nome, focar) {
+    telaAtual = nome;
+    ["semana", "mes", "teste", "plano", "historico", "dados"].forEach(function (t) { $("tela-" + t).hidden = (t !== nome); });
+    document.querySelectorAll(".nav button").forEach(function (b) {
+      if (b.getAttribute("data-tela") === nome) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    desenhar();
+    window.scrollTo(0, 0);
+    if (focar) { var h = $("h-" + nome); if (h) h.focus(); }
+  }
+
+  function desenhar() {
+    $("faixaExemplo").hidden = !exemplo;
+    $("menuExemplo").textContent = exemplo ? "Sair do exemplo" : "Ver o exemplo da Brasa no Bairro";
+    document.querySelectorAll("[data-real]").forEach(function (b) { b.disabled = !!exemplo; });
+    $("dadosExemploAviso").hidden = !exemplo;
+    $("avisoArmazenamento").hidden = armazenamentoOk;
+    desenharSemana();
+    desenharMes();
+    desenharTeste();
+    desenharPlano();
+    desenharHistorico();
+    desenharDados();
+  }
+
+  function preencher(id, texto) { var el = $(id); if (document.activeElement !== el) el.value = texto; }
+
+  function desenharSemana() {
+    var q = quadroAberto(), c = calcSemana(q);
+    preencher("qData", q.data);
+    // No exemplo, a data de verdade é só interna; aparece "Dia 1 do mês 4".
+    $("qDataCaixa").hidden = !!exemplo;
+    $("qDataExemplo").hidden = !exemplo;
+    $("qDataExemplo").textContent = exemplo ? rotuloData(q.data) : "";
+    LINHAS.forEach(function (l) { preencher("q_" + l.id, valorCampo(q[l.id])); });
+    preencher("q_saidas", valorCampo(q.saidas));
+
+    var origem = $("q_saidasOrigem");
+    if (q.saidasDe && q.saidas !== null) {
+      origem.textContent = "Sugestão do Controle de retiradas (" + nomeMes(q.saidasDe.mes) + "): gastos da empresa sem o pró-labore " +
+        rs(q.saidasDe.gastos) + " + pró-labore combinado " + rs(q.saidasDe.proLabore) + ". Pode trocar.";
+      origem.hidden = false;
+    } else origem.hidden = true;
+    var s = sugestaoSaidas();
+    var mostrarBotao = s && q.saidas === null;
+    $("q_saidasSugerir").hidden = !mostrarBotao;
+    if (mostrarBotao) $("btnSugestao").textContent = "Usar a sugestão do Controle de retiradas: " + rs(s.total);
+
+    // Resultado no topo
+    var h = "";
+    if (!c.completo) {
+      h = blocoLeitura("neutro", "Falta preencher", ["Preencha as 7 linhas em \"Valores da semana\", mais abaixo. Faltam " + c.faltam + "."]);
+    } else {
+      h = '<div class="destaque"><span class="rot">Saldo disponível</span><span class="val' + (c.saldo < 0 ? " negativo" : "") + '">' + rs(c.saldo) + '</span>' +
+        '<span class="ind-exp">' + EXPLICA.saldo + '</span></div>';
+      if (c.faixa) {
+        var f = FAIXAS[c.faixa];
+        var metaTxt = c.faixa < 3 ? '<div class="meta"><span>Meta da faixa 3 (7 × desembolso diário): <strong>' + rs(c.meta) + '</strong></span><span>Falta: <strong>' + rs(c.falta) + '</strong></span></div>' : "";
+        h += blocoLeitura(f.tom, "Faixa " + c.faixa, [f.criterio, "<strong>Decisão:</strong> " + f.decisao], metaTxt + '<p class="suave">' + FRASE_LIMITES + '</p>');
+      } else {
+        h += blocoLeitura("neutro", "Falta o total de saídas", [c.temSaidas ? "O total de saídas do mês está muito baixo: o desembolso diário daria menos de R$ 1. Confira o valor." : "Preencha o total de saídas do mês para ver o fôlego e a faixa."]);
+      }
+    }
+    $("semResultado").innerHTML = h;
+
+    // Comparação com o quadro anterior
+    $("semComparacao").innerHTML = htmlComparacao(q, c);
+
+    // Outros indicadores
+    $("semIndicadores").hidden = !c.completo;
+    if (c.completo) {
+      var t = "";
+      t += ind("Capital circulante líquido", val(rs(c.ccl)), EXPLICA.ccl);
+      t += ind("Necessidade de capital de giro", val(rs(c.ncg)), EXPLICA.ncg);
+      t += ind("Quanto da folga o giro consome", c.consome === null ? '<span class="val-texto">Sem folga: o capital circulante líquido não é positivo</span>' : val(pct(c.consome)), "Necessidade de capital de giro ÷ capital circulante líquido.");
+      if (c.desembolso !== undefined) {
+        t += ind("Fôlego de caixa livre", val(dias(c.folegoLivre)), EXPLICA.folegoLivre, "principal");
+        t += ind("Desembolso diário", val(rs(c.desembolso)), "Total de saídas do mês ÷ 30, em reais inteiros.");
+        t += ind("Fôlego de caixa", val(dias(c.folegoCaixa)), EXPLICA.folegoCaixa, "menor");
+      }
+      $("semLista").innerHTML = t;
+    }
+
+    var lemb = $("lembreteCopia");
+    var dias30 = dados.ultimaCopia ? (Date.now() - new Date(dados.ultimaCopia).getTime()) / 86400000 : Infinity;
+    var temAlgo = dados.semanas.some(function (x) { return calcSemana(x).completo; });
+    if (!exemplo && temAlgo && dias30 > DIAS_SEM_COPIA) {
+      $("lembreteCopiaTxt").textContent = dados.ultimaCopia ? "Faz mais de um mês que você não faz uma cópia de segurança desta página." : "Você ainda não fez uma cópia de segurança desta página. Ela evita perder os dados se o navegador for limpo.";
+      lemb.hidden = false;
+    } else lemb.hidden = true;
+  }
+
+  function htmlComparacao(q, c) {
+    var ant = quadroAnterior(q);
+    if (!ant || !c.completo) return "";
+    var ca = calcSemana(ant);
+    if (!ca.completo) return "";
+    var dif = c.saldo - ca.saldo, frase;
+    var base = "Em relação ao " + rotuloQuadro(ant.data) + ", o saldo disponível ";
+    if (Math.round(dif / 100) === 0) frase = base + "ficou igual.";
+    else frase = base + (dif > 0 ? "subiu " : "caiu ") + rs(Math.abs(dif)) + ".";
+    var p = [frase];
+    if (dif < 0 && Math.round(dif / 100) !== 0) {
+      var maior = null;
+      LINHAS_COMPARADAS.forEach(function (id) {
+        var v = q[id] - ant[id];
+        if (!maior || Math.abs(v) > Math.abs(maior.v)) maior = { id: id, v: v };
+      });
+      var nome = LINHAS.filter(function (l) { return l.id === maior.id; })[0].nome;
+      if (Math.round(maior.v / 100) === 0) p.push("Contas a receber, estoque e contas a pagar (linhas 4 a 6) não mudaram.");
+      else p.push("A linha que mais mudou foi " + nome + ": " + (maior.v > 0 ? "subiu " : "caiu ") + rs(Math.abs(maior.v)) + ".");
+    }
+    return blocoLeitura("neutro", "Comparação com a semana anterior", p);
+  }
+
+  function desenharMes() {
+    var d = atual(), m = mesAberto(), r = calcMes(m);
+    $("txtMes").textContent = nomeMes(d.mesAberto, true);
+    preencher("m_custo", valorCampo(m.custo));
+    preencher("m_receita", valorCampo(m.receita));
+    preencher("m_prazo", valorCampo(m.receitaPrazo));
+    preencher("m_dias", m.dias === null ? "" : String(m.dias).replace(".", ","));
+    preencher("m_estoque", valorCampo(m.estoque));
+    preencher("m_fornecedores", valorCampo(m.fornecedores));
+    $("m_origem").hidden = !m.origemQuadro;
+    if (m.origemQuadro) $("m_origem").textContent = "Estoque e fornecedores trazidos do " + rotuloQuadro(m.origemQuadro) + ". Pode trocar.";
+    var fonte = quadroDoMes(d.mesAberto);
+    var difere = fonte && (fonte.estoque !== m.estoque || fonte.fornecedores !== m.fornecedores);
+    $("m_trazer").hidden = !difere;
+    if (difere) $("btnTrazer").textContent = "Trazer estoque e fornecedores do " + rotuloQuadro(fonte.data);
+
+    var h;
+    if (r.pedir) h = blocoLeitura("neutro", "Falta preencher", [r.pedir]);
+    else {
+      var t = "";
+      t += ind("Prazo de estoque", val(r.estoque === null ? "Falta" : dias(r.estoque)), "Estoque ÷ (custo da mercadoria do mês ÷ 30).");
+      t += ind("Prazo de recebimento", val(r.recebimento === null ? "Falta" : dias(r.recebimento)), "Dias para receber × (receita a prazo ÷ receita do mês).");
+      t += ind("Prazo de pagamento", val(r.pagamento === null ? "Falta" : dias(r.pagamento)), "Fornecedores ÷ (custo da mercadoria do mês ÷ 30).");
+      t += ind("Ciclo financeiro", val(r.ciclo === null ? "Falta" : dias(r.ciclo)), EXPLICA.ciclo, "principal");
+      h = '<div class="caixa"><h3>Resultado do mês</h3><div class="indicadores">' + t + '</div>' +
+        (r.avisos.length ? '<div class="pilha">' + r.avisos.map(function (a) { return '<p class="msg-erro">' + a + '</p>'; }).join("") + '</div>' : "") +
+        (r.ciclo !== null ? '<p class="suave">Ciclo financeiro = prazo de estoque + prazo de recebimento − prazo de pagamento.</p>' : "") + '</div>';
+    }
+    $("mesResultado").innerHTML = h;
+  }
+
+  function capitulosNao(respostas) {
+    var caps = [];
+    respostas.forEach(function (r, i) { if (r === false) caps.push(i + 1); });
+    return caps;
+  }
+  function listaCapitulos(caps) {
+    if (!caps.length) return "";
+    if (caps.length === 1) return "Capítulo " + caps[0];
+    return "Capítulos " + caps.slice(0, -1).join(", ") + " e " + caps[caps.length - 1];
+  }
+  function contarSim(r) { return r.filter(function (x) { return x === true; }).length; }
+
+  function desenharTeste() {
+    var d = atual(), testes = d.testes, ult = testes[testes.length - 1];
+    var h = "";
+    if (ult) {
+      var sims = contarSim(ult.respostas), res = resultadoTeste(sims), caps = capitulosNao(ult.respostas);
+      var p = ["<strong>" + sims + " de 10</strong> respostas sim.", res.frase, "<strong>O que fazer:</strong> " + res.fazer,
+        caps.length ? "<strong>Capítulos para reler:</strong> " + caps.join(", ") + "." : "<strong>Capítulos para reler:</strong> nenhum, todas as respostas foram sim."];
+      var ant = testes[testes.length - 2];
+      if (ant) {
+        var sa = contarSim(ant.respostas), dif = sims - sa;
+        var comp = "Teste anterior (" + rotuloData(ant.data) + "): " + sa + " sim. Agora: " + sims + " sim (" +
+          (dif > 0 ? dif + " a mais" : dif < 0 ? (-dif) + " a menos" : "igual") + ").";
+        var viraramSim = [], viraramNao = [];
+        ult.respostas.forEach(function (r, i) {
+          if (r === true && ant.respostas[i] === false) viraramSim.push(i + 1);
+          if (r === false && ant.respostas[i] === true) viraramNao.push(i + 1);
+        });
+        if (viraramSim.length) comp += " Passaram para sim: " + listaCapitulos(viraramSim) + ".";
+        if (viraramNao.length) comp += " Passaram para não: " + listaCapitulos(viraramNao) + ".";
+        p.push(comp);
+      }
+      h = blocoLeitura(res.tom, "Último teste: " + rotuloData(ult.data), p);
+    } else {
+      h = '<p class="suave">Você ainda não guardou nenhum teste. Responda as 10 perguntas abaixo.</p>';
+    }
+    $("testeResultado").innerHTML = h;
+    $("h-perguntas").textContent = ult ? "Refazer o teste" : "Fazer o teste";
+
+    var r = d.rascunhoTeste;
+    $("perguntas").innerHTML = PERGUNTAS.map(function (texto, i) {
+      return '<div class="pergunta" role="group" aria-labelledby="perg' + i + '"><p id="perg' + i + '">' + (i + 1) + ') ' + texto + ' <span class="suave">(Capítulo ' + (i + 1) + ')</span></p>' +
+        '<div class="sim-nao"><button type="button" class="chip" data-resp="' + i + '" data-v="sim" aria-pressed="' + (r[i] === true) + '">Sim</button>' +
+        '<button type="button" class="chip" data-resp="' + i + '" data-v="nao" aria-pressed="' + (r[i] === false) + '">Não</button></div></div>';
+    }).join("");
+    var faltam = r.filter(function (x) { return x === null; }).length;
+    $("testeFaltam").textContent = faltam ? "Faltam " + faltam + (faltam === 1 ? " pergunta." : " perguntas.") : "Todas respondidas: " + contarSim(r) + " sim.";
+    $("btnGuardarTeste").disabled = faltam > 0;
+  }
+
+  function semanaDoPlano(p, n) {
+    var ini = somarDias(p.inicio, 7 * (n - 1)), fim = somarDias(ini, 6);
+    var q = semanasOrdenadas(atual()).filter(function (x) { return x.data >= ini && x.data <= fim; })[0] || null;
+    return { ini: ini, fim: fim, quadro: q };
+  }
+
+  function desenharPlano() {
+    var d = atual(), p = d.plano;
+    preencher("pInicio", p.inicio);
+    $("pInicioCaixa").hidden = !!exemplo;
+    $("pInicioExemplo").hidden = !exemplo;
+    $("pInicioExemplo").textContent = exemplo ? rotuloData(p.inicio) : "";
+    $("avisoRefazer").hidden = diasEntre(p.inicio, hoje()) < 28;
+
+    var ult = d.testes[d.testes.length - 1];
+    var sugestoes = SUGESTOES.map(function (s) { return { acao: s, cap: null }; });
+    if (ult) capitulosNao(ult.respostas).forEach(function (c) { sugestoes.push({ acao: "Reler o Capítulo " + c, cap: c }); });
+
+    var cont = $("semanasPlano");
+    // Mantém o foco quando a pessoa está digitando numa ação.
+    var focado = document.activeElement && document.activeElement.id && /^p\d_acao$/.test(document.activeElement.id) ? document.activeElement.id : null;
+    if (focado) return;
+    cont.innerHTML = p.linhas.map(function (l, i) {
+      var n = i + 1, s = semanaDoPlano(p, n), valor;
+      if (!s.quadro) valor = "Sem quadro nesta semana";
+      else {
+        var v = valorIndicador(calcSemana(s.quadro), l.numero);
+        valor = v === null ? "O " + rotuloQuadro(s.quadro.data) + " está incompleto" : v + " (" + rotuloQuadro(s.quadro.data) + ")";
+      }
+      return '<div class="caixa semana-plano">' +
+        '<h3>Semana ' + n + ' <span class="suave">(' + rotuloDataCurta(s.ini) + ' a ' + rotuloDataCurta(s.fim) + ')</span></h3>' +
+        '<div class="campo"><label for="p' + i + '_numero">Número da semana</label><select id="p' + i + '_numero" data-plano="' + i + '" data-campo="numero">' +
+        INDICADORES_PLANO.map(function (x) { return '<option value="' + x.id + '"' + (x.id === l.numero ? " selected" : "") + '>' + x.nome + '</option>'; }).join("") + '</select></div>' +
+        '<div class="campo"><span class="rotulo">Valor na segunda-feira</span><p id="p' + i + '_valor">' + valor + '</p></div>' +
+        '<div class="campo"><label for="p' + i + '_acao">Ação da semana</label><div class="entrada"><textarea id="p' + i + '_acao" rows="2" maxlength="160" data-plano="' + i + '" data-campo="acao">' + esc(l.acao) + '</textarea></div>' +
+        '<details class="sugestoes"><summary>Sugestões de ação</summary><div class="chips">' +
+        sugestoes.map(function (sg) { return '<button type="button" class="chip" data-sugestao="' + i + '" data-acao-txt="' + esc(sg.acao) + '"' + (sg.cap ? ' data-cap="' + sg.cap + '"' : "") + '>' + esc(sg.acao) + '</button>'; }).join("") +
+        '</div></details></div>' +
+        '<div class="campo"><label for="p' + i + '_capitulo">Capítulo de apoio</label><select id="p' + i + '_capitulo" data-plano="' + i + '" data-campo="capitulo"><option value="">Escolha</option>' +
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (c) { return '<option value="' + c + '"' + (l.capitulo === c ? " selected" : "") + '>Capítulo ' + c + '</option>'; }).join("") + '</select></div>' +
+        '<label class="check"><input type="checkbox" data-plano="' + i + '" data-campo="feito"' + (l.feito ? " checked" : "") + '> Feito</label>' +
+        '</div>';
+    }).join("");
+
+    var ant = d.planosAnteriores;
+    $("planosAnteriores").hidden = !ant.length;
+    $("listaPlanos").innerHTML = ant.slice().reverse().map(function (pl) {
+      return '<div class="pilha"><p class="rotulo">Plano que começou em ' + rotuloData(pl.inicio) + '</p><ul class="lista">' +
+        pl.linhas.map(function (l, i) {
+          return '<li class="item"><span><strong>Semana ' + (i + 1) + ':</strong> ' + (l.acao ? esc(l.acao) : "sem ação") +
+            (l.capitulo ? " (Capítulo " + l.capitulo + ")" : "") + (l.feito ? " · feito" : " · não feito") + '</span></li>';
+        }).join("") + '</ul></div>';
+    }).join("");
+  }
+
+  function etiquetaFaixa(c) {
+    if (!c.completo) return '<span class="etiqueta neutro">Falta preencher</span>';
+    if (!c.faixa) return '<span class="etiqueta neutro">Sem faixa</span>';
+    return '<span class="etiqueta ' + FAIXAS[c.faixa].tom + '">Faixa ' + c.faixa + '</span>';
+  }
+
+  function desenharHistorico() {
+    var d = atual();
+    var ord = semanasOrdenadas(d).reverse();
+    $("histSemanas").innerHTML = ord.map(function (q) {
+      var c = calcSemana(q);
+      var info = c.completo
+        ? '<span>Saldo disponível: <strong>' + rs(c.saldo) + '</strong></span><span>Fôlego de caixa livre: <strong>' + (c.desembolso !== undefined ? dias(c.folegoLivre) : "falta o total de saídas") + '</strong></span>'
+        : '<span class="vazio">Quadro incompleto</span>';
+      return '<li class="item"><div class="item-topo"><h4>' + rotuloData(q.data) + (q.id === d.semanaAberta ? ' <span class="suave">(aberto)</span>' : "") + '</h4>' + etiquetaFaixa(c) + '</div>' +
+        '<div class="item-info">' + info + '</div>' +
+        '<div><button type="button" class="btn sec pequeno" data-abrir-quadro="' + q.id + '">Abrir o quadro de ' + rotuloData(q.data) + '</button></div></li>';
+    }).join("");
+
+    var ks = Object.keys(d.meses).sort().reverse();
+    $("histMeses").innerHTML = ks.length ? ks.map(function (k) {
+      var r = calcMes(d.meses[k]);
+      return '<li class="item"><div class="item-topo"><h4>' + nomeMes(k, true) + '</h4></div>' +
+        '<div class="item-info"><span>Ciclo financeiro: <strong>' + (r.ciclo !== null && r.ciclo !== undefined ? dias(r.ciclo) : "falta preencher") + '</strong></span></div>' +
+        '<div><button type="button" class="btn sec pequeno" data-abrir-mes="' + k + '">Abrir ' + nomeMes(k) + '</button></div></li>';
+    }).join("") : '<li class="item vazio">Nenhuma parte do mês guardada ainda.</li>';
+
+    var ts = d.testes.slice().reverse();
+    $("histTestes").innerHTML = ts.length ? ts.map(function (t) {
+      var s = contarSim(t.respostas), res = resultadoTeste(s);
+      return '<li class="item"><div class="item-topo"><h4>' + rotuloData(t.data) + '</h4><span class="etiqueta ' + res.tom + '">' + s + ' de 10 sim</span></div><p>' + res.frase + '</p></li>';
+    }).join("") : '<li class="item vazio">Nenhum teste guardado ainda.</li>';
+  }
+
+  function desenharDados() {
+    var q = quadroAberto();
+    $("btnApagarQuadro").textContent = "Apagar o quadro de " + rotuloData(q.data);
+    $("txtUltimaCopia").textContent = dados.ultimaCopia
+      ? "Última cópia feita neste aparelho: " + dataBR(dados.ultimaCopia.slice(0, 10)) + "."
+      : "Você ainda não fez nenhuma cópia desta página neste aparelho.";
+    var ua = navigator.userAgent || "";
+    $("dadosIphone").hidden = !(/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1));
+  }
+
+  /* ---------- Ações: quadro da semana ---------- */
+  function montarCamposSemana() {
+    $("camposSemana").innerHTML = LINHAS.map(function (l, i) {
+      var id = "q_" + l.id;
+      return '<div class="campo" id="campo-' + id + '"><label for="' + id + '"><span class="num-linha">' + (i + 1) + ')</span>' + l.nome + '</label>' +
+        '<p class="dica" id="' + id + 'Dica">' + l.dica + '</p>' +
+        '<div class="entrada"><span class="prefixo" aria-hidden="true">R$</span><input id="' + id + '" type="text" inputmode="decimal" autocomplete="off" placeholder="0" aria-describedby="' + id + 'Dica ' + id + 'Erro"></div>' +
+        '<p class="msg-erro" id="' + id + 'Erro" hidden></p></div>';
+    }).join("");
+    LINHAS.forEach(function (l) { campoValor("q_" + l.id, function () { return quadroAberto(); }, l.id, salvarSemana); });
+    campoValor("q_saidas", function () { return quadroAberto(); }, "saidas", salvarSemana, function (q) { delete q.saidasDe; });
+  }
+  function salvarSemana() { salvar(); $("qSalvo").textContent = exemplo ? "Alterado só no exemplo." : "Salvo."; desenharSemana(); desenharPlano(); desenharHistorico(); }
+
+  // Liga um campo de valor a uma propriedade de um registro.
+  function campoValor(id, registro, prop, aoMudar, extra) {
+    var el = $(id);
+    function aplicar(final) {
+      var v = lerValor(el.value);
+      if (isNaN(v)) { if (final) erroCampo(id, "Não entendi o valor. Escreva assim: 1200 ou 1.200,50."); return; }
+      erroCampo(id, "");
+      var r = registro();
+      if (r[prop] !== v) { r[prop] = v; if (extra) extra(r); aoMudar(r); }
+      if (final) el.value = valorCampo(v);
+    }
+    el.addEventListener("input", function () { aplicar(false); });
+    el.addEventListener("change", function () { aplicar(true); });
+    el.addEventListener("blur", function () { aplicar(true); });
+  }
+
+  function mudarDataQuadro() {
+    var el = $("qData"), v = el.value, q = quadroAberto();
+    if (!v) { erroCampo("qData", "Escolha a data do quadro."); return; }
+    var outro = atual().semanas.filter(function (x) { return x.data === v && x.id !== q.id; })[0];
+    if (outro) { erroCampo("qData", "Já existe um quadro com essa data. Abra-o pela lista em \"Ver outros quadros\"."); return; }
+    erroCampo("qData", "");
+    if (q.data !== v) { q.data = v; salvar(); desenhar(); avisar("Data do quadro trocada."); }
+  }
+
+  function novoQuadro() {
+    var d = atual(), dt = hoje();
+    var existe = d.semanas.filter(function (x) { return x.data === dt; })[0];
+    if (existe) {
+      d.semanaAberta = existe.id; salvar(); mostrarTela("semana");
+      avisar("Já existe um quadro com a data de hoje. Ele foi aberto.");
+      return;
+    }
+    var q = quadroVazio(dt); aplicarSugestao(q);
+    d.semanas.push(q); d.semanaAberta = q.id;
+    salvar(); mostrarTela("semana");
+    avisar("Quadro novo de " + rotuloData(dt) + ".");
+    $("q_caixa").focus();
+  }
+
+  function apagarQuadro() {
+    var d = dados, q = quadroAberto();
+    confirmar("Apagar o quadro de " + rotuloData(q.data) + "?", "Os valores desta semana vão ser apagados. Não dá para desfazer, a não ser que você tenha uma cópia de segurança.", "Apagar o quadro").then(function (sim) {
+      if (!sim) return;
+      d.semanas = d.semanas.filter(function (x) { return x.id !== q.id; });
+      d.semanaAberta = null; garantir(d);
+      salvar(); mostrarTela("semana");
+      avisar("Quadro apagado.");
+    });
+  }
+
+  function apagarTudo() {
+    confirmar("Apagar todos os dados desta página?", "Todos os quadros, meses, testes e planos desta página vão ser apagados. Os dados do Controle de retiradas não são mexidos.", "Apagar tudo").then(function (sim) {
+      if (!sim) return;
+      dados = dadosVazios(); garantir(dados);
+      salvar(); mostrarTela("semana");
+      avisar("Todos os dados desta página foram apagados.");
+    });
+  }
+
+  /* ---------- Ações: parte do mês ---------- */
+  function ligarMes() {
+    var campos = [["m_custo", "custo"], ["m_receita", "receita"], ["m_prazo", "receitaPrazo"], ["m_estoque", "estoque"], ["m_fornecedores", "fornecedores"]];
+    campos.forEach(function (c) { campoValor(c[0], mesAberto, c[1], aoMudarMes); });
+    var el = $("m_dias");
+    function aplicar(final) {
+      var v = lerDias(el.value);
+      if (isNaN(v)) { if (final) erroCampo("m_dias", "Escreva só o número de dias, por exemplo 30."); return; }
+      erroCampo("m_dias", "");
+      var m = mesAberto();
+      if (m.dias !== v) { m.dias = v; aoMudarMes(m); }
+      if (final) el.value = v === null ? "" : String(v).replace(".", ",");
+    }
+    el.addEventListener("input", function () { aplicar(false); });
+    el.addEventListener("change", function () { aplicar(true); });
+    el.addEventListener("blur", function () { aplicar(true); });
+  }
+  function aoMudarMes(m) { guardarMes(m); $("mSalvo").textContent = exemplo ? "Alterado só no exemplo." : "Salvo."; desenharMes(); desenharHistorico(); }
+
+  function trazerDoQuadro() {
+    var m = mesAberto(), q = quadroDoMes(atual().mesAberto);
+    if (!q) return;
+    m.estoque = q.estoque; m.fornecedores = q.fornecedores; m.origemQuadro = q.data;
+    guardarMes(m); desenharMes(); desenharHistorico();
+    avisar("Estoque e fornecedores trazidos do quadro.");
+  }
+
+  function abrirMeses() {
+    var d = atual(), ks = Object.keys(d.meses).sort().reverse();
+    if (ks.indexOf(d.mesAberto) < 0) ks.unshift(d.mesAberto);
+    $("listaMeses").innerHTML = ks.map(function (k) {
+      return '<li><button type="button" data-abrir-mes="' + k + '"' + (k === d.mesAberto ? ' aria-current="true"' : "") + '><span>' + nomeMes(k, true) + '</span></button></li>';
+    }).join("");
+    $("outroMes").hidden = !!exemplo;
+    $("nAbrir").hidden = !!exemplo;
+    var p = d.mesAberto.split("-"), anoHoje = new Date().getFullYear();
+    $("nMes").innerHTML = NOMES_MESES.map(function (n, i) { return '<option value="' + (i + 1) + '">' + n.charAt(0).toUpperCase() + n.slice(1) + '</option>'; }).join("");
+    var anos = [];
+    for (var a = Math.min(anoHoje - 2, +p[0]); a <= Math.max(anoHoje + 1, +p[0]); a++) anos.push(a);
+    $("nAno").innerHTML = anos.map(function (a) { return '<option value="' + a + '">' + a + '</option>'; }).join("");
+    $("nMes").value = String(+p[1]); $("nAno").value = p[0];
+    abrir($("dlgMeses"));
+  }
+  function abrirMes(chave) {
+    atual().mesAberto = chave; mesVirtual = null;
+    salvar(); fechar($("dlgMeses")); mostrarTela("mes");
+  }
+
+  /* ---------- Ações: teste ---------- */
+  function responder(i, v) {
+    atual().rascunhoTeste[i] = v;
+    salvar(); desenharTeste();
+    var b = document.querySelector('[data-resp="' + i + '"][data-v="' + (v ? "sim" : "nao") + '"]');
+    if (b) b.focus();
+  }
+  function guardarTeste() {
+    var d = atual(), r = d.rascunhoTeste;
+    if (r.some(function (x) { return x === null; })) return;
+    var dt = hoje();
+    d.testes = d.testes.filter(function (t) { return t.data !== dt; }); // um teste por dia: refazer no mesmo dia substitui
+    d.testes.push({ data: dt, respostas: r.slice() });
+    d.rascunhoTeste = [null, null, null, null, null, null, null, null, null, null];
+    salvar(); desenhar();
+    window.scrollTo(0, 0); $("h-teste").focus();
+    avisar("Resultado do teste guardado.");
+  }
+
+  /* ---------- Ações: plano ---------- */
+  function mudarPlano(el) {
+    var i = +el.getAttribute("data-plano"), campo = el.getAttribute("data-campo"), l = atual().plano.linhas[i];
+    if (campo === "numero") l.numero = el.value;
+    else if (campo === "capitulo") l.capitulo = el.value ? +el.value : null;
+    else if (campo === "feito") l.feito = el.checked;
+    else if (campo === "acao") l.acao = el.value.slice(0, 160);
+    salvar();
+    if (campo !== "acao") desenharPlano();
+  }
+  function usarSugestao(btn) {
+    var i = +btn.getAttribute("data-sugestao"), l = atual().plano.linhas[i];
+    l.acao = btn.getAttribute("data-acao-txt");
+    if (btn.hasAttribute("data-cap")) l.capitulo = +btn.getAttribute("data-cap");
+    salvar(); desenharPlano();
+    $("p" + i + "_acao").focus();
+    avisar("Ação da semana " + (i + 1) + " preenchida.");
+  }
+  function novoPlano() {
+    confirmar("Começar um plano novo?", "O plano atual vai para a lista de planos anteriores, e o novo começa hoje com as 4 semanas em branco.", "Começar plano novo", "normal").then(function (sim) {
+      if (!sim) return;
+      var d = atual(), velho = d.plano;
+      velho.guardadoEm = hoje();
+      d.planosAnteriores.push(velho);
+      d.plano = planoVazio(hoje());
+      salvar(); mostrarTela("plano");
+      avisar("Plano novo começado.");
+    });
+  }
+
+  /* ---------- Arquivos ---------- */
+  function baixar(nome, conteudo, tipo) {
+    var blob = new Blob([conteudo], { type: tipo });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = nome;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1500);
+  }
+  // Célula da planilha. Valores digitados: 6800,00. Resultados: reais inteiros, dias e percentuais com vírgula.
+  function celula(v) {
+    if (v === null || v === undefined) return "";
+    var s = String(v);
+    if (/^[=+\-@]/.test(s)) s = "'" + s;
+    if (/[;"\r\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+  function cDig(c) { if (c === null || c === undefined) return ""; var r = Math.floor(c / 100), ce = c % 100; return r + "," + (ce < 10 ? "0" : "") + ce; }
+  function cRes(c) { if (c === null || c === undefined) return ""; var r = Math.round(Math.abs(c) / 100); return (c < 0 && r ? "-" : "") + r; }
+  function cDec(d) { if (d === null || d === undefined) return ""; return decimal(d).replace("−", "-"); }
+
+  function baixarPlanilha() {
+    var d = dados, L = [];
+    L.push([PERSONALIZACAO.nomeDaFerramenta]);
+    L.push(["Baixado em " + dataBR(hojeReal())]);
+    L.push([]);
+    L.push(["QUADROS SEMANAIS"]);
+    L.push(["Data"].concat(LINHAS.map(function (l) { return l.nome; })).concat(["Total de saídas do mês", "Capital circulante líquido", "Necessidade de capital de giro", "Saldo disponível", "Desembolso diário", "Fôlego de caixa livre (dias)", "Fôlego de caixa (dias)", "Quanto da folga o giro consome (%)", "Faixa"]));
+    semanasOrdenadas(d).forEach(function (q) {
+      var c = calcSemana(q);
+      L.push([dataBR(q.data)].concat(LINHAS.map(function (l) { return cDig(q[l.id]); })).concat([cDig(q.saidas),
+        c.completo ? cRes(c.ccl) : "", c.completo ? cRes(c.ncg) : "", c.completo ? cRes(c.saldo) : "",
+        c.desembolso !== undefined ? cRes(c.desembolso) : "", c.desembolso !== undefined ? cDec(c.folegoLivre) : "", c.desembolso !== undefined ? cDec(c.folegoCaixa) : "",
+        c.completo ? (c.consome === null ? "Sem folga: o capital circulante líquido não é positivo" : cDec(c.consome)) : "",
+        c.faixa ? "Faixa " + c.faixa : ""]));
+    });
+    L.push([]);
+    L.push(["PARTE DO MÊS"]);
+    L.push(["Mês", "Custo da mercadoria do mês", "Receita do mês", "Receita do mês que entra a prazo", "Dias para receber", "Estoque", "Fornecedores", "Prazo de estoque (dias)", "Prazo de recebimento (dias)", "Prazo de pagamento (dias)", "Ciclo financeiro (dias)"]);
+    Object.keys(d.meses).sort().forEach(function (k) {
+      var m = d.meses[k], r = calcMes(m);
+      L.push([nomeMes(k, true), cDig(m.custo), cDig(m.receita), cDig(m.receitaPrazo), m.dias === null ? "" : String(m.dias).replace(".", ","),
+        cDig(m.estoque), cDig(m.fornecedores), cDec(r.estoque), cDec(r.recebimento), cDec(r.pagamento), cDec(r.ciclo)]);
+    });
+    L.push([]);
+    L.push(["TESTES DO LIVRO"]);
+    L.push(["Data", "Respostas sim", "Resultado", "O que fazer", "Capítulos para reler"].concat(PERGUNTAS.map(function (_, i) { return "Capítulo " + (i + 1); })));
+    d.testes.forEach(function (t) {
+      var s = contarSim(t.respostas), res = resultadoTeste(s);
+      L.push([dataBR(t.data), s, res.frase, res.fazer, capitulosNao(t.respostas).join(", ")].concat(t.respostas.map(function (x) { return x ? "sim" : "não"; })));
+    });
+    L.push([]);
+    L.push(["PLANO DE AÇÃO DE 30 DIAS"]);
+    L.push(["Começo do plano", "Semana", "Número da semana", "Valor na segunda-feira", "Ação da semana", "Capítulo de apoio", "Feito"]);
+    function linhasPlano(p) {
+      p.linhas.forEach(function (l, i) {
+        var s = semanaDoPlano(p, i + 1), nome = INDICADORES_PLANO.filter(function (x) { return x.id === l.numero; })[0].nome;
+        var v = s.quadro ? valorIndicador(calcSemana(s.quadro), l.numero) : null;
+        L.push([dataBR(p.inicio), i + 1, nome, v ? v.replace(/ /g, " ") : "", l.acao, l.capitulo || "", l.feito ? "sim" : "não"]);
+      });
+    }
+    d.planosAnteriores.forEach(linhasPlano);
+    linhasPlano(d.plano);
+    var csv = L.map(function (l) { return l.map(celula).join(";"); }).join("\r\n");
+    baixar("quadro-4-indicadores-" + hojeReal() + ".csv", "﻿" + csv, "text/csv;charset=utf-8");
+    avisar("Planilha baixada.");
+  }
+
+  function fazerCopia() {
+    dados.ultimaCopia = new Date().toISOString();
+    var pacote = { app: "quadro-4-indicadores", versao: 1, feitaEm: dados.ultimaCopia, dados: dados };
+    baixar("copia-quadro-indicadores-" + hojeReal() + ".json", JSON.stringify(pacote, null, 2), "application/json");
+    salvar(); desenhar();
+    avisar("Cópia de segurança baixada.");
+  }
+
+  function lerCopia(arquivo) {
+    var leitor = new FileReader();
+    leitor.onload = function () {
+      var pacote = null;
+      try { pacote = JSON.parse(leitor.result); } catch (e) { pacote = null; }
+      if (pacote && pacote.app === "controle-retiradas-do-dono") {
+        confirmar("Esta cópia é do Controle de retiradas", "Para restaurar esta cópia, abra a página Controle de retiradas (Capítulo 1) e use \"Restaurar cópia\" lá.", "Entendi", "aviso");
+        return;
+      }
+      var novos = pacote && pacote.app === "quadro-4-indicadores" ? limpar(pacote.dados) : null;
+      if (!novos) {
+        confirmar("Não foi possível restaurar", "Este arquivo não é uma cópia de segurança desta página, ou está danificado. Escolha o arquivo que começa com \"copia-quadro-indicadores\".", "Entendi", "aviso");
+        return;
+      }
+      var nQ = novos.semanas.length, nT = novos.testes.length;
+      confirmar("Restaurar esta cópia?",
+        "A cópia tem " + nQ + (nQ === 1 ? " quadro semanal" : " quadros semanais") + " e " + nT + (nT === 1 ? " teste do livro" : " testes do livro") + ". Os dados que estão agora nesta página vão ser trocados pelos da cópia.",
+        "Restaurar", "normal").then(function (sim) {
+        if (!sim) return;
+        novos.ultimaCopia = pacote.feitaEm || novos.ultimaCopia;
+        dados = novos; garantir(dados); mesVirtual = null;
+        salvar(); mostrarTela("semana");
+        avisar("Cópia restaurada.");
+      });
+    };
+    leitor.readAsText(arquivo);
+  }
+
+  /* ---------- Modo exemplo ---------- */
+  function entrarExemplo() { exemplo = montarExemplo(); mesVirtual = null; fechar($("dlgMenu")); mostrarTela("semana"); }
+  function sairExemplo() { exemplo = null; mesVirtual = null; fechar($("dlgMenu")); mostrarTela("semana"); avisar("Você voltou para os seus dados."); }
+
+  /* ---------- Ligações ---------- */
+  function ligar() {
+    $("txtEbook").textContent = PERSONALIZACAO.nomeDoEbook + " · " + PERSONALIZACAO.parteDoLivro;
+    $("txtFerramenta").textContent = PERSONALIZACAO.nomeDaFerramenta;
+    document.title = PERSONALIZACAO.nomeDaFerramenta;
+    $("txtAvisoEducativo").textContent = "Ferramenta educativa que acompanha a " + PERSONALIZACAO.parteDoLivro + " do " + PERSONALIZACAO.nomeDoEbook + ".";
+    montarCamposSemana();
+    ligarMes();
+    $("qData").addEventListener("change", mudarDataQuadro);
+    $("pInicio").addEventListener("change", function () { if (this.value) { atual().plano.inicio = this.value; salvar(); desenharPlano(); } });
+    $("formSemana").addEventListener("submit", function (ev) { ev.preventDefault(); });
+    $("formMes").addEventListener("submit", function (ev) { ev.preventDefault(); });
+    $("formMeses").addEventListener("submit", function (ev) { ev.preventDefault(); abrirMes($("nAno").value + "-" + doisDig(+$("nMes").value)); });
+    $("btnMenu").addEventListener("click", function () { abrir($("dlgMenu")); });
+    $("arquivoCopia").addEventListener("change", function () { if (this.files[0]) lerCopia(this.files[0]); this.value = ""; });
+
+    $("semanasPlano").addEventListener("change", function (ev) { if (ev.target.hasAttribute("data-plano")) mudarPlano(ev.target); });
+    $("semanasPlano").addEventListener("input", function (ev) { if (ev.target.getAttribute("data-campo") === "acao") mudarPlano(ev.target); });
+
+    document.addEventListener("click", function (ev) {
+      var el = ev.target.closest("button");
+      if (!el) return;
+      if (el.hasAttribute("data-tela")) { mostrarTela(el.getAttribute("data-tela"), true); return; }
+      if (el.hasAttribute("data-ir")) { document.querySelectorAll("dialog").forEach(fechar); mostrarTela(el.getAttribute("data-ir"), true); return; }
+      if (el.hasAttribute("data-fechar")) { fechar(el.closest("dialog")); return; }
+      if (el.hasAttribute("data-abrir-quadro")) { atual().semanaAberta = el.getAttribute("data-abrir-quadro"); salvar(); mostrarTela("semana"); return; }
+      if (el.hasAttribute("data-abrir-mes")) { abrirMes(el.getAttribute("data-abrir-mes")); return; }
+      if (el.hasAttribute("data-resp")) { responder(+el.getAttribute("data-resp"), el.getAttribute("data-v") === "sim"); return; }
+      if (el.hasAttribute("data-sugestao")) { usarSugestao(el); return; }
+      var acao = el.getAttribute("data-acao");
+      if (!acao || el.disabled) return;
+      if (acao === "novoQuadro") novoQuadro();
+      else if (acao === "usarSugestao") { var q = quadroAberto(); aplicarSugestao(q); salvarSemana(); }
+      else if (acao === "verTopo") { window.scrollTo(0, 0); $("h-semana").focus(); }
+      else if (acao === "trocarMes") abrirMeses();
+      else if (acao === "trazerQuadro") trazerDoQuadro();
+      else if (acao === "guardarTeste") guardarTeste();
+      else if (acao === "novoPlano") novoPlano();
+      else if (acao === "planilha") baixarPlanilha();
+      else if (acao === "copia") fazerCopia();
+      else if (acao === "restaurar") $("arquivoCopia").click();
+      else if (acao === "apagarQuadro") apagarQuadro();
+      else if (acao === "apagarTudo") apagarTudo();
+      else if (acao === "exemplo") { if (exemplo) sairExemplo(); else entrarExemplo(); }
+      else if (acao === "sairExemplo") sairExemplo();
+    });
+
+    // Se a página estiver aberta em duas abas, mantém as duas iguais.
+    window.addEventListener("storage", function (ev) {
+      if (ev.key === CHAVE && !exemplo) { carregar(); desenhar(); }
+    });
+  }
+
+  /* ---------- Início ---------- */
+  carregar();
+  ligar();
+  if (navigator.storage && navigator.storage.persist) { try { navigator.storage.persist().catch(function () {}); } catch (e) {} }
+  mostrarTela("semana");
+  salvar();
+
+  // Usado só nos testes automáticos.
+  window.__quadro = { calcSemana: calcSemana, calcMes: calcMes, lerValor: lerValor };
+})();
+</script>
+</body>
+</html>
